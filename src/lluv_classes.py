@@ -10,13 +10,13 @@ class UsbStorageDevice:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self._name
 
-    def get_size(self):
+    def get_size(self) -> int:
         return self._size
 
-    def get_path(self):
+    def get_path(self) -> str:
         return self._path
 
 

@@ -60,7 +60,7 @@ def fetch_usb() -> dict:
 
 def get_usb_size(path: str) -> int:
     """
-    routine to get the storage size of the usb drive addressed by the path
+    Function to get the storage size of the usb drive addressed by the path
     :param path: /dev/sda or whatever
     :return: size of the device
     """
@@ -70,7 +70,7 @@ def get_usb_size(path: str) -> int:
 
 def fetch_images(iso_dir: str) -> dict:
     """
-    routine to gather data about iso files in the specified directory
+    Function to gather data about iso files in the specified directory
     :return: images
     """
     images = {}
@@ -92,7 +92,7 @@ def fetch_images(iso_dir: str) -> dict:
 
 def get_rec_size(size: str) -> str:
     """
-    routine to check to see if the specified usb storage device is large enough for the selected ISO
+    Function to check to see if the specified usb storage device is large enough for the selected ISO
     :param size: name of selected usb FORMAT: ##...##MB
     :return: rec_size  the recommended size in GB
     """
@@ -111,22 +111,78 @@ def get_rec_size(size: str) -> str:
     return rec_size
 
 
-def check_compatibility(selected_usb_size: str, iso_rec_size: int) -> bool:
+def check_compatibility(selected_usb_size: int, iso_rec_size: str) -> bool:
     """
-    function to test whether or not the usb is large enough for selected ISO
+    Function to test whether or not the usb is large enough for selected ISO
     :param:string: selected_usb_size pointer to selected usb device size
     :param:int: iso_rec_size recommended size selected ISO needs
     :return: true if size is large enough
     """
-    print(selected_usb_size)
-    print(iso_rec_size)
-    if selected_usb_size >= iso_rec_size * 1000000000:
+    if selected_usb_size >= int((iso_rec_size.split())[0]) * 1000000000:
         return True
     else:
         return False
 
 
-def write_to_device(image_name: str, usb_path: str, iso_dir_path):
+def check_for_partitions(usb_path: str) -> bool:
+    None
+
+
+def calculate_block_size(usb_path: str) -> str:
+    """
+    function to calculate the optimal block size for selected device
+    tests block sizes ranging from 512b - 64M
+    device must have a mountable partition
+    :param usb_path: path of usb with a mountable partition
+    :return: optimal block size with speed
+    """
+    config = configparser.ConfigParser()
+    config.read('lluv.conf')
+
+    mount_path = config['configuration']['mount']  # mount point
+
+    err = subprocess.run(["sudo", "mount", usb_path+"1", mount_path], stderr=subprocess.PIPE)
+
+    test_file_size = 134217728  # 128 m
+    b_size = 65536
+    count = test_file_size//b_size  # number of segment copies
+
+    subprocess.run(["sudo", "dd", "if=/dev/urandom", "of="+mount_path+"/temp", "bs="+str(b_size), "count="+str(count)],
+                   stderr=subprocess.PIPE)
+
+    block_sizes = {512: "512b", 1024: "1K", 2048: "2K", 4096: "4k", 8192: "8K", 16384: "16K", 32768: "32K",
+                   65536: "64K", 131072: "128K", 262144: "256K", 524288: "512K", 1048576: "1M", 2097152: "2M",
+                   4194304: "4M", 8388608: "8M", 16777216: "16M", 33554432: "32M", 67108864: "64M"}
+    best_speed = -1
+    best_size = ""
+    for block_size in block_sizes.keys():
+        out = str(subprocess.run(["dd", "if="+mount_path+"/temp", "of=/dev/null", "bs="+str(block_size)],
+                                stderr=subprocess.PIPE)).split()
+        result = out[len(out)-2]
+        if float(result) > best_speed:
+            best_speed = float(result)
+            best_size = block_size
+
+    subprocess.run(["sudo", "rm", "-rf", mount_path+"/temp"])
+    subprocess.run(["sudo", "umount", mount_path])
+
+    return block_sizes[best_size]
+
+
+def write_to_device(image_name: str, usb_path: str, iso_dir_path: str, block: str):
+    """
+    Function to take the gathered information and perform the write
+    using dd
+    :param image_name: name of image to write
+    :param usb_path: path to usb device
+    :param iso_dir_path: path to iso
+    :return: None
+    """
     full_iso_path = iso_dir_path+"/"+image_name
+    out = str(subprocess.run(["sudo", "dd", "bs="+block, "if=" + full_iso_path, "of=" + usb_path],
+                         stderr=subprocess.PIPE)).split("\\n")
+    subprocess.run(["sync"])
+
+    print(out[2])
 
 
