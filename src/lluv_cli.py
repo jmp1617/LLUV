@@ -108,6 +108,8 @@ def main():
                     elif choice == key_num+2:
                         done_step_one = False
                         done_step_two = False
+                        p_usb_devices = fetch_usb()
+                        images = fetch_images(iso_dir_path)
                     elif choice == 0:
                         exit()
                     else:
@@ -161,10 +163,14 @@ def main():
                     elif choice == 2:
                         done_step_one = False
                         done_step_three = False
+                        p_usb_devices = fetch_usb()
+                        images = fetch_images(iso_dir_path)
                         break
                     elif choice == 3:
                         done_step_two = False
                         done_step_three = False
+                        p_usb_devices = fetch_usb()
+                        images = fetch_images(iso_dir_path)
                         break
                     elif choice == 0:
                         exit()
@@ -178,7 +184,8 @@ def main():
                         if final == "Y":
                             print("Beginning Write...")
                             write_to_device(images[selected_iso].get_name(),
-                                            p_usb_devices[selected_usb].get_path(), iso_dir_path, selected_block_size)
+                                            p_usb_devices[selected_usb].get_path(), iso_dir_path, selected_block_size,
+                                            images[selected_iso].get_size()[:len(images[selected_iso].get_size())-2])
                             print("Done")
                             exit()
                         else:
