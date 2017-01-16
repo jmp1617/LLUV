@@ -11,7 +11,7 @@ DD - for writing the image <br />
 Awk - for testing mount location <br />
 
 # Run
-sudo python3.5 lluv_cli.py (needs root for storage device acess)
+sudo python3.5 lluv_cli.py (needs root for storage device access)
 
 # Configuration file
 Edit values such as the path to the images, drives to ignore, leeway in recommended <br />
