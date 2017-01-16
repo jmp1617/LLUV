@@ -1,2 +1,3 @@
 # L.L.U.V.
-A live linux USB vending machine for CSH 
+The LLUV machine (or Linux Live Usb Vending) machine is a service that allows
+users to select an image from a repository and write it to a usb storage device.

@@ -1,5 +1,5 @@
 """
-LLUV base routines
+LLUV backend
 
 author: Jacob Potter CSH:(jpotter)
 """
@@ -8,6 +8,8 @@ import configparser
 import shlex
 import math
 import sys
+import threading
+from time import sleep
 from lluv_classes import *
 
 
@@ -139,38 +141,43 @@ def calculate_block_size(usb_path: str) -> str:
 
     mount_path = config['configuration']['mount']  # mount point
 
-    check_mount = str(subprocess.run(shlex.split("awk -v needle=\""+usb_path+"1\" '$1==needle {print $2}' /proc/mounts")
-                                     , stdout=subprocess.PIPE)).split()[8]  # check kernel
+    check_mount = str(subprocess.run(shlex.split("awk -v needle=\""+usb_path+"1\" '$1==needle {print $2}' "
+                                                 "/proc/mounts"), stdout=subprocess.PIPE)).split()[8]  # check kernel
     cur_mount_point = (check_mount.split("'")[1]).strip("\\n")
     if cur_mount_point != '':  # if the drive is already mounted
         subprocess.run(["sudo", "umount", cur_mount_point])  # unmount it
 
-    subprocess.run(["sudo", "mount", usb_path+"1", mount_path])
+    errmount = str(subprocess.run(["sudo", "mount", usb_path+"1", mount_path], stderr=subprocess.PIPE)).split("'")
 
-    test_file_size = 134217728  # 128 m
-    b_size = 65536
-    count = test_file_size//b_size  # number of segment copies
+    size = None
 
-    subprocess.run(["sudo", "dd", "if=/dev/urandom", "of="+mount_path+"/temp", "bs="+str(b_size), "count="+str(count)],
-                   stderr=subprocess.PIPE)  # write a bunch of random bits to the mount path
+    if errmount[9] == '':
+        test_file_size = 134217728  # 128 m
+        b_size = 65536
+        count = test_file_size//b_size  # number of segment copies
 
-    block_sizes = {512: "512b", 1024: "1K", 2048: "2K", 4096: "4k", 8192: "8K", 16384: "16K", 32768: "32K",
-                   65536: "64K", 131072: "128K", 262144: "256K", 524288: "512K", 1048576: "1M", 2097152: "2M",
-                   4194304: "4M", 8388608: "8M", 16777216: "16M", 33554432: "32M", 67108864: "64M"}
-    best_speed = -1
-    best_size = ""
-    for block_size in block_sizes.keys():
-        out = str(subprocess.run(["dd", "if="+mount_path+"/temp", "of=/dev/null", "bs="+str(block_size)],
-                                 stderr=subprocess.PIPE)).split()  # write from the drive to dev null to test speed
-        result = out[len(out)-2]
-        if float(result) > best_speed:
-            best_speed = float(result)
-            best_size = block_size
+        subprocess.run(["sudo", "dd", "if=/dev/urandom", "of="+mount_path+"/temp", "bs="+str(b_size), "count=" +
+                        str(count)],
+                       stderr=subprocess.PIPE)  # write a bunch of random bits to the mount path
 
-    subprocess.run(["sudo", "rm", "-rf", mount_path+"/temp"])  # remove the created test file
-    subprocess.run(["sudo", "umount", mount_path])  # and unmount
+        block_sizes = {512: "512b", 1024: "1K", 2048: "2K", 4096: "4k", 8192: "8K", 16384: "16K", 32768: "32K",
+                       65536: "64K", 131072: "128K", 262144: "256K", 524288: "512K", 1048576: "1M", 2097152: "2M",
+                       4194304: "4M", 8388608: "8M", 16777216: "16M", 33554432: "32M", 67108864: "64M"}
+        best_speed = -1
+        best_size = ""
+        for block_size in block_sizes.keys():
+            out = str(subprocess.run(["dd", "if="+mount_path+"/temp", "of=/dev/null", "bs="+str(block_size)],
+                                     stderr=subprocess.PIPE)).split()  # write from the drive to dev null to test speed
+            result = out[len(out)-2]
+            if float(result) > best_speed:
+                best_speed = float(result)
+                best_size = block_size
 
-    return block_sizes[best_size]
+        subprocess.run(["sudo", "rm", "-rf", mount_path+"/temp"])  # remove the created test file
+        subprocess.run(["sudo", "umount", mount_path])  # and unmount
+        size = block_sizes[best_size]
+
+    return size
 
 
 def write_to_device(image_name: str, usb_path: str, iso_dir_path: str, block: str, img_size: str):
@@ -184,25 +191,42 @@ def write_to_device(image_name: str, usb_path: str, iso_dir_path: str, block: st
     :param img_size size of selected image
     :return: None
     """
+
+    full_iso_path = iso_dir_path+"/"+image_name
+    cmds = shlex.split("sudo dd if="+full_iso_path+" of="+usb_path+" bs="+block+" status=progress oflag=sync")
+    size = int(img_size)
+
+    p1 = threading.Thread(name='dd_subprocess', target=dd, args=(cmds, ))
+    p2 = threading.Thread(name='dd_progress_bar', target=dd_progress_bar, args=(size, ))
+
+    p1.start()
+    p2.start()
+
+    p1.join()
+    p2.join()
+
+    subprocess.run(["sync"])
+
+
+def dd(cmds):
+    """
+    dd command wrapper
+    :param cmds: dd commands
+    :return:
+    """
     config = configparser.ConfigParser()
     config.read('lluv.conf')
 
     file = config['configuration']['dd_prog_location']  # log location
 
     log = open(file, 'w')
-
-    full_iso_path = iso_dir_path+"/"+image_name
-    cmds = shlex.split("sudo dd if="+full_iso_path+" of="+usb_path+" bs="+block+" status=progress oflag=sync")
-
-    dd = subprocess.Popen(cmds, stderr=log, bufsize=1, universal_newlines=True)
-    dd.communicate()
-
-    # dd_progress_bar(int(img_size[:len(img_size)-2]))
-
-    subprocess.run(["sync"])
+    d = subprocess.Popen(cmds, stderr=log, bufsize=1, universal_newlines=True)
+    d.communicate()
+    d.wait()
+    log.close()
 
 
-def dd_status(file: str, img_size: int) -> float:
+def dd_status(file: str, img_size: int) -> list:
     """
     function to read the output file of dd and convert it
     to a percent completion
@@ -210,6 +234,7 @@ def dd_status(file: str, img_size: int) -> float:
     :param img_size: size of the image
     :return: percent completion of dd
     """
+    next_line = None
     try:
         file = open(file)
     except FileNotFoundError:
@@ -221,37 +246,54 @@ def dd_status(file: str, img_size: int) -> float:
         else:
             line = file.readline().strip("\n")
         next_line = file.readline().strip("\n")
+        if "records" in line:  # done or process killed prematurely (pulling out the drive)
+            file.close()
+            return [100, img_size]
         if line_num != 0:
             if next_line == '':
-                last_line = line
+                last_line = line.split()
                 break
         line_num += 1
     file.close()
-    percent_complete = (float(last_line.split()[2][1:])/img_size)*100
-    return percent_complete
+    if len(last_line) > 1:
+        current_write = last_line[2][1:]
+        if last_line[3][:2] == "MB":
+            percent_complete = (float(current_write)/img_size)*100
+        elif last_line[3][:2] == "GB":
+            percent_complete = (float(current_write)*1000 / img_size) * 100
+        else:
+            percent_complete = 0.0
+        file.close()
+        return [percent_complete, current_write]
+    else:
+        file.close()
+        return [0.0, 0]
 
 
-def generate_status_bar(percent: float):
+def generate_status_bar(percent: float, img_size: int, current_write: int):
     """
     take a percent and create a progress bar
-    :param percent:
+    :param percent: percent complete
+    :param img_size: size of the image MB
+    :param current_write: current MB amount written
     :return: progress bar
     """
-    number_bars = int(str(percent)[0])
+    bar_length = 50
+    number_bars = round((int(str(percent).split(".")[0]))/(100/bar_length))  # calculate number of bars
     progress_bar = "["
     for i in range(number_bars):
         if i == number_bars-1:
-            progress_bar += "==>"
+            progress_bar += ">"
         else:
-            progress_bar += "==="
-    for i in range(10-number_bars):
-        progress_bar += "   "
-    return progress_bar + "] " + str(round(percent, 2)) + "%"
+            progress_bar += "="
+    for i in range(bar_length-number_bars):
+        progress_bar += " "
+    return progress_bar + "] " + str(round(percent)) + "% - " + str(current_write) + "/" + str(img_size) + " MB Written"
 
 
 def dd_progress_bar(img_size: int):
     """
-    wrapper function for thread
+    wrapper function for thread to create the progress bar
     :param img_size: size of selected image in MB
     :return:
     """
@@ -260,5 +302,9 @@ def dd_progress_bar(img_size: int):
 
     file = config['configuration']['dd_prog_location']  # log location
 
-    print(generate_status_bar(dd_status(file, img_size)))
-
+    percent, current_write = dd_status(file, img_size)
+    while percent != 100:
+        percent, current_write = dd_status(file, img_size)
+        sys.stdout.write("\r"+generate_status_bar(percent, img_size, current_write))
+        sleep(0.5)
+    print("\n")

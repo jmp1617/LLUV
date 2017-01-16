@@ -1,10 +1,20 @@
 """
 simple CLI for LLUV
+
+author: Jacob Potter CSH:(jpotter)
 """
 from lluv import *
 
 
 def display_curr_choices(selected_usb: str, selected_iso: str, p_usb_devices: dict, images: dict):
+    """
+    print selected
+    :param selected_usb:
+    :param selected_iso:
+    :param p_usb_devices:
+    :param images:
+    :return:
+    """
     if selected_usb is not "":
         print("\nSelected USB Device:", p_usb_devices[selected_usb].get_name())
     else:
@@ -128,20 +138,18 @@ def main():
                     print("Selected USB size:", p_usb_devices[selected_usb].get_size()/1000000000, " GB")
 
                 print("\nCalculating Block Size for " + p_usb_devices[selected_usb].get_name() + "...")
-                try:
-                    selected_block_size = calculate_block_size(p_usb_devices[selected_usb].get_path())
-                    print("Using: "+selected_block_size+" as it is an optimal bs")
-                except ValueError:
-                    config = configparser.ConfigParser()
-                    config.read('lluv.conf')
 
-                    mount_path = config['configuration']['mount']  # mount point
-                    subprocess.run(["sudo", "umount", mount_path])
+                selected_block_size = calculate_block_size(p_usb_devices[selected_usb].get_path())
+
+                if selected_block_size is None:
                     print("Could not calculate optimal block size\n"
                           "This could be because the drive is write protected\n"
                           "(ex. already a live usb).\n"
                           "It could also be because the drive is unallocated.\n"
                           "A default block size of 512K will be used.")
+                    selected_block_size = "512K"
+                else:
+                    print("Using: " + selected_block_size + " as it is an optimal bs")
 
             while not done_step_three and done_step_two:
                 done_step_three = True
@@ -182,7 +190,7 @@ def main():
                         print("WARNING: This will destroy everything on selected device\n")
                         final = input("(Y/N) -> ")
                         if final == "Y":
-                            print("Beginning Write...")
+                            print("Beginning Write...\n")
                             write_to_device(images[selected_iso].get_name(),
                                             p_usb_devices[selected_usb].get_path(), iso_dir_path, selected_block_size,
                                             images[selected_iso].get_size()[:len(images[selected_iso].get_size())-2])
