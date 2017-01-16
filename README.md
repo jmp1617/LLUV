@@ -5,9 +5,9 @@ The backend uses DD so use with care. If the usb device is allocated and writabl
 a block size will automatically be generated for optimal performance.
 
 # Dependencies
-lsscsi - for discovering usb storage devices
-DD - for writing the image
-Awk - for testing mount location
+lsscsi - for discovering usb storage devices <br />
+DD - for writing the image <br />
+Awk - for testing mount location <br />
 
 # Run
 sudo python3.5 lluv_cli.py (needs root for storage device acess)
