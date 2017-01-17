@@ -43,7 +43,8 @@ def main():
         print("\nStarting... ")
         iso_dir_path = get_path()
         p_usb_devices = fetch_usb()
-        images = fetch_images(iso_dir_path)
+        categories = fetch_images(iso_dir_path)
+        images = generate_image_master(categories)
         print("Done")
 
         done_step_one = False
@@ -95,31 +96,37 @@ def main():
                 display_curr_choices(selected_usb, selected_iso, p_usb_devices, images)
 
                 print("STEP TWO - Select an image")
+                print("Categories:")
 
                 key_num = 1
-                for key, image in images.items():
-                    print("\t", key, ") ", image.get_name(), "-", image.get_size())
-                    key_num = key
-                print("\t", key_num + 1, ")  Refresh Images")
-                print("\t", key_num + 2, ")  Go Back")
-                print("\t 0 )  QUIT")
+                for cat in categories:
+                    print("\t"+cat.get_name())
+                    for key, image in cat.get_images().items():
+                        print("\t\t", key, ") ", image.get_name())
+                        key_num += 1
+
+                print("\tOther Options")
+                print("\t\t", key_num, ")  Refresh Images")
+                print("\t\t", key_num + 1, ")  Go Back")
+                print("\t\t 0 )  QUIT")
 
                 try:
                     choice = int(input("\nlluv -> "))
 
-                    if choice < 0 or choice > (key_num+2):
+                    if choice < 0 or choice > (key_num+1):
                         print("\nNot a valid number, choose a number 0 -", key_num+1, "\n")
                         done_step_two = False
-                    elif choice == key_num+1:
+                    elif choice == key_num:
                         print("\nRefreshing Images...")
                         images = fetch_images(iso_dir_path)
                         print("Done")
                         done_step_two = False
-                    elif choice == key_num+2:
+                    elif choice == key_num+1:
                         done_step_one = False
                         done_step_two = False
                         p_usb_devices = fetch_usb()
-                        images = fetch_images(iso_dir_path)
+                        categories = fetch_images(iso_dir_path)
+                        images = generate_image_master(categories)
                     elif choice == 0:
                         exit()
                     else:
@@ -141,11 +148,12 @@ def main():
 
                 selected_block_size = calculate_block_size(p_usb_devices[selected_usb].get_path())
 
-                if selected_block_size is None:
+                if selected_block_size == '':
                     print("Could not calculate optimal block size\n"
                           "This could be because the drive is write protected\n"
                           "(ex. already a live usb).\n"
-                          "It could also be because the drive is unallocated.\n"
+                          "It could also be because the drive is unallocated, or it\n"
+                          "was not able to be un mounted.\n"
                           "A default block size of 512K will be used.")
                     selected_block_size = "512K"
                 else:
@@ -172,13 +180,15 @@ def main():
                         done_step_one = False
                         done_step_three = False
                         p_usb_devices = fetch_usb()
-                        images = fetch_images(iso_dir_path)
+                        categories = fetch_images(iso_dir_path)
+                        images = generate_image_master(categories)
                         break
                     elif choice == 3:
                         done_step_two = False
                         done_step_three = False
                         p_usb_devices = fetch_usb()
-                        images = fetch_images(iso_dir_path)
+                        categories = fetch_images(iso_dir_path)
+                        images = generate_image_master(categories)
                         break
                     elif choice == 0:
                         exit()
@@ -189,10 +199,12 @@ def main():
                         print("\t", p_usb_devices[selected_usb].get_name(), "\n")
                         print("WARNING: This will destroy everything on selected device\n")
                         final = input("(Y/N) -> ")
-                        if final == "Y":
+                        if final in ("Y", "y"):
                             print("Beginning Write...\n")
                             write_to_device(images[selected_iso].get_name(),
-                                            p_usb_devices[selected_usb].get_path(), iso_dir_path, selected_block_size,
+                                            p_usb_devices[selected_usb].get_path(),
+                                            iso_dir_path+"/"+images[selected_iso].get_cat(),  # Account for iso category
+                                            selected_block_size,
                                             images[selected_iso].get_size()[:len(images[selected_iso].get_size())-2])
                             print("Done")
                             exit()
