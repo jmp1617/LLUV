@@ -25,3 +25,6 @@ By default, Images in the image directory specified in the config will be put in
 category. To create Image categories, create a subdirectory and place images of said category inside. <br />
 For example, placing fedora images in the directory /"default img path"/Fedora would render them in the <br />
 "Fedora" category. Categories will be sorted alphabetically.
+
+# Compatible Operating Systems
+Linux
