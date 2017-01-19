@@ -1,7 +1,5 @@
 import npyscreen
 import lluv
-import threading
-from time import sleep
 import multiprocessing
 
 
