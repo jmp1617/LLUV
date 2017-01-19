@@ -310,7 +310,8 @@ class SelectForm(npyscreen.ActionForm):
                 compat = lluv.check_compatibility(usb.get_size(), image.get_rsize())
                 if not compat:
                     self.aux_pop("The selected usb device is not large enough for the selected image. ("
-                                 + image.get_name() + ") has a recommended size of " + image.get_rsize(), "Not Compatible")
+                                 + image.get_name() + ") has a recommended size of " + image.get_rsize(),
+                                 "Not Compatible")
             # Initialize write popup
             if pass1 and compat:
                 result = self.warning_yesno(image.get_name(), usb.get_name(), block)
@@ -319,6 +320,14 @@ class SelectForm(npyscreen.ActionForm):
                     for widget in self.all_widgets:
                         widget.editable = False
                     self.parentApp.IS_WRITING = True  # Flag as ready to write
+                    if self.parentApp.IS_WRITING and not self.parentApp.running:  # If the start is seleceted and dd
+                        self.parentApp.running = True
+                        p = multiprocessing.Process(target=lluv_write_ex, args=(  # isn't already running
+                            self.parentApp.selected_image.get_cat() + "/" + self.parentApp.selected_image.get_name(),
+                            self.parentApp.selected_usb.get_path(),
+                            self.parentApp.selected_block,
+                            self.parentApp.selected_image.get_size(),))
+                        p.start()
 
     def on_cancel(self):
         if not self.parentApp.IS_WRITING:  # Disable cancel button
@@ -406,7 +415,7 @@ class SelectForm(npyscreen.ActionForm):
     def while_waiting(self):
         if self.parentApp.percent == 100:
                 self.pbar.value = 100
-                if self.parentApp.selected_image is not None:
+                if self.parentApp.selected_image is not None:  # make sure 100 is displayed
                     self.written.value = self.written.value = \
                         str(self.parentApp.selected_image.get_size()[:len(self.parentApp.selected_image.get_size())-2]) \
                         + " / " + \
@@ -421,14 +430,7 @@ class SelectForm(npyscreen.ActionForm):
                     self.parentApp.selected_usb.get_name() + " successfully!", "Writing Successful")
                 # Begin Cancel Form
                 self.full_reset()
-        if self.parentApp.IS_WRITING and not self.parentApp.running:  # If the start is seleceted and dd isn't already
-            self.parentApp.running = True
-            p = multiprocessing.Process(target=lluv_write_ex, args=(  # running
-                self.parentApp.selected_image.get_cat() + "/" + self.parentApp.selected_image.get_name(),
-                self.parentApp.selected_usb.get_path(),
-                self.parentApp.selected_block,
-                self.parentApp.selected_image.get_size(),))
-            p.start()
+
 
     def full_reset(self):
         self.parentApp.reset_values()
@@ -522,6 +524,7 @@ class LluvTui(npyscreen.StandardApp):
                                            (self.percent / 100))
             self.queue_event(npyscreen.Event("DISPLAY"))
 
+
     def reset_values(self):
         self.refresh()
         # SEL
@@ -538,7 +541,6 @@ class LluvTui(npyscreen.StandardApp):
         self.IS_DONE_WRITE = False
         self.running = False
         self.waited_a_sec = False
-
 
     def refresh(self):
         self.img_categories = lluv.fetch_images(lluv.get_path())

@@ -274,7 +274,7 @@ def dd(cmds):
     d.communicate()
     d.wait()
     log.close()
-    subprocess.run(["sudo", "rm", "-rf", file])  # Leave the log
+    # subprocess.run(["sudo", "rm", "-rf", file]) # Leave the log
 
 
 def dd_status(img_size: int) -> float:
