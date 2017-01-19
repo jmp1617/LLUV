@@ -201,10 +201,10 @@ def main():
                         final = input("(Y/N) -> ")
                         if final in ("Y", "y"):
                             print("Beginning Write...\n")
-                            write_to_device(images[selected_iso].get_name(),
+                            write_to_device(images[selected_iso].get_cat()+"/"+images[selected_iso].get_name(),  # Account for iso category
                                             p_usb_devices[selected_usb].get_path(),
-                                            iso_dir_path+"/"+images[selected_iso].get_cat(),  # Account for iso category
                                             selected_block_size,
+                                            images[selected_iso].get_size()[:len(images[selected_iso].get_size())-2],
                                             True)
                             print("Done")
                             exit()
