@@ -214,12 +214,12 @@ def calculate_block_size(usb_path: str) -> str:
     cur_mount_point = (check_mount.split("'")[1]).strip("\\n")
     if cur_mount_point != '':  # if the drive is already mounted
         init_umount = str(subprocess.run(["umount", cur_mount_point], stderr=subprocess.PIPE)).split("'")
-        if init_umount[6] != '':  # Could not un mount for some reason
+        if init_umount[5] != '':  # Could not un mount for some reason
             return size
 
     errmount = str(subprocess.run(["mount", usb_path+"1", mount_path], stderr=subprocess.PIPE)).split("'")
-
-    if errmount[8] == '':  # begin test if there are no errors
+    print(errmount[7])
+    if errmount[7] == '':  # begin test if there are no errors
         test_file_size = 134217728  # 128 mb
         b_size = 65536
         count = test_file_size//b_size  # number of segment copies
