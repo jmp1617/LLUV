@@ -163,6 +163,8 @@ class TitleForm(npyscreen.Form):
 class SelectForm(npyscreen.ActionForm):
     def create(self):
 
+        self.keypress_timeout = 10
+
         self.cat = self.add(CatSelectionBox,
                             name="Select an Category:",
                             max_width=30,
@@ -316,32 +318,11 @@ class SelectForm(npyscreen.ActionForm):
                 if result:
                     for widget in self.all_widgets:
                         widget.editable = False
-                    self.parentApp.IS_WRITING = True
-                    # START WRITE PROCESS
-
+                    self.parentApp.IS_WRITING = True  # Flag as ready to write
 
     def on_cancel(self):
         if not self.parentApp.IS_WRITING:  # Disable cancel button
-            self.parentApp.reset_values()
-            self.parentApp.switchForm('MAIN')
-            self.selected_usb_box.value = "Not Yet Selected"
-            self.selected_img_box.value = "Not Yet Selected"
-            self.img.values = ["- Select a Category First -"]
-            self.bs_slide.value = 0
-            self.pbar.value = 0
-            self.parentApp.selected_image = None
-            self.parentApp.current_write = 0
-            self.parentApp.selected_category = None
-            self.parentApp.selected_block = "512K"
-            self.parentApp.selected_usb = None
-            self.parentApp.haspoped = False
-            self.display_block.values = ["     ▼", "  Selected: " + self.parentApp.selected_block, "",
-                                         "-Rec. Size For Image-", "                ▲"]
-            for widget in self.sel_widgets:
-                widget.value = None
-            self.block_check.value = [0]
-            self.written.value = "0 / 0 MB"
-            self.bs_slide.editable = False
+            self.full_reset()
 
     def adjust_widgets(self):
         # Write complete pop
@@ -381,6 +362,7 @@ class SelectForm(npyscreen.ActionForm):
             self.selected_usb_box.value = "Not Yet Selected"
         else:
             self.selected_usb_box.value = self.parentApp.selected_usb.get_name()
+
         # update block size
         block_sizes = ["512b", "1K", "2K", "4k", "8K", "16K", "32K", "64K", "128K", "256K", "512K", "1M", "2M",
                        "4M", "8M", "16M", "32M", "64M"]
@@ -407,6 +389,7 @@ class SelectForm(npyscreen.ActionForm):
             self.bs_slide.editable = False
             self.parentApp.haspoped = False
             self.parentApp.selected_block = "512K"
+
         if self.parentApp.selected_image is None:
             self.display_block.values = ["     ▼", "  Selected: " + self.parentApp.selected_block, "",
                                          " -Rec. Size For Image-", "                ▲"]
@@ -422,14 +405,14 @@ class SelectForm(npyscreen.ActionForm):
 
     def while_waiting(self):
         if self.parentApp.percent == 100:
-            if self.parentApp.waited_a_sec:
                 self.pbar.value = 100
-                self.written.value = self.written.value = \
-                    str(self.parentApp.selected_image.get_size()[:len(self.parentApp.selected_image.get_size())-2]) \
-                    + " / " + \
-                    str(self.parentApp.selected_image.get_size())
-                self.pbar.display()
-                self.written.display()
+                if self.parentApp.selected_image is not None:
+                    self.written.value = self.written.value = \
+                        str(self.parentApp.selected_image.get_size()[:len(self.parentApp.selected_image.get_size())-2]) \
+                        + " / " + \
+                        str(self.parentApp.selected_image.get_size())
+                    self.pbar.display()
+                    self.written.display()
                 self.parentApp.IS_WRITING = False
                 self.parentApp.running = False
                 self.parentApp.IS_DONE_WRITE = True
@@ -437,9 +420,7 @@ class SelectForm(npyscreen.ActionForm):
                     self.parentApp.selected_image.get_name() + " was written to " +
                     self.parentApp.selected_usb.get_name() + " successfully!", "Writing Successful")
                 # Begin Cancel Form
-                self.parentApp.setNextForm
-            else:
-                self.parentApp.waited_a_sec = True
+                self.full_reset()
         if self.parentApp.IS_WRITING and not self.parentApp.running:  # If the start is seleceted and dd isn't already
             self.parentApp.running = True
             p = multiprocessing.Process(target=lluv_write_ex, args=(  # running
@@ -449,6 +430,27 @@ class SelectForm(npyscreen.ActionForm):
                 self.parentApp.selected_image.get_size(),))
             p.start()
 
+    def full_reset(self):
+        self.parentApp.reset_values()
+        self.parentApp.switchForm('MAIN')
+        self.selected_usb_box.value = "Not Yet Selected"
+        self.selected_img_box.value = "Not Yet Selected"
+        self.img.values = ["- Select a Category First -"]
+        self.bs_slide.value = 0
+        self.pbar.value = 0
+        self.parentApp.selected_image = None
+        self.parentApp.current_write = 0
+        self.parentApp.selected_category = None
+        self.parentApp.selected_block = "512K"
+        self.parentApp.selected_usb = None
+        self.parentApp.haspoped = False
+        self.display_block.values = ["     ▼", "  Selected: " + self.parentApp.selected_block, "",
+                                     "-Rec. Size For Image-", "                ▲"]
+        for widget in self.sel_widgets:
+            widget.value = None
+        self.block_check.value = [0]
+        self.written.value = "0 / 0 MB"
+        self.bs_slide.editable = False
 
     def spawn_autobs_pop(self):
         message = "You have selected auto block size. This should work on your storage device if it is" \
@@ -520,7 +522,6 @@ class LluvTui(npyscreen.StandardApp):
                                            (self.percent / 100))
             self.queue_event(npyscreen.Event("DISPLAY"))
 
-
     def reset_values(self):
         self.refresh()
         # SEL
@@ -528,8 +529,16 @@ class LluvTui(npyscreen.StandardApp):
         self.selected_image = None
         self.selected_usb = None
         self.selected_block = "512K"  # Default BS
+        self.current_write = 0
+        self.percent = 0
         # FLA
         self.activate_bs_slider = True
+        self.haspoped = False
+        self.IS_WRITING = False
+        self.IS_DONE_WRITE = False
+        self.running = False
+        self.waited_a_sec = False
+
 
     def refresh(self):
         self.img_categories = lluv.fetch_images(lluv.get_path())
