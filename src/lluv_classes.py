@@ -2,10 +2,11 @@ class UsbStorageDevice:
     """
     object to hold define a usb device
     """
-    def __init__(self, name: str, size: int, path: str):
+    def __init__(self, name: str, size: int, path: str, key: int):
         self._name = name
         self._size = size
         self._path = path
+        self._key = key
 
     def __str__(self) -> str:
         return "USB DEVICE[ name:\'"+self._name+"\' size:"+str(self._size)+" path:"+self._path+" ]"
@@ -22,16 +23,20 @@ class UsbStorageDevice:
     def get_path(self) -> str:
         return self._path
 
+    def get_key(self) -> int:
+        return self._key
+
 
 class Image:
     """
     object to define an image
     """
-    def __init__(self, name: str, size: str, rsize: str, cat: str):
+    def __init__(self, name: str, size: str, rsize: str, cat: str, key: int):
         self._name = name
         self._size = size
         self._rsize = rsize
         self._cat = cat
+        self._key = key
 
     def __str__(self) -> str:
         return "IMAGE[ name:\'"+self._name+"\' size:"+str(self._size) + \
@@ -51,6 +56,9 @@ class Image:
 
     def get_cat(self) -> str:
         return self._cat
+
+    def get_key(self) -> int:
+        return self._key
 
 
 class Category:

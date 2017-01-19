@@ -46,20 +46,28 @@ def fetch_usb() -> dict:
         if len(split) == 7:  # If the device name is two words
             name = split[3] + " " + split[4]
             if name not in ignore:
-                usb_dict[usb_num] = UsbStorageDevice(name, get_usb_size(split[6]), split[6])
+                usb_dict[usb_num] = UsbStorageDevice(name, get_usb_size(split[6]), split[6], usb_num)
                 usb_num += 1
-            else:
-                print("IGNORING: ", name)
 
         elif len(split) == 6:  # If the device name is one word
             name = split[3]
             if name not in ignore:
-                usb_dict[usb_num] = UsbStorageDevice(name, get_usb_size(split[5]), split[5])
+                usb_dict[usb_num] = UsbStorageDevice(name, get_usb_size(split[5]), split[5], usb_num)
                 usb_num += 1
-            else:
-                print("IGNORING: ", name)
 
     return usb_dict
+
+
+def generate_list(usb_dict: dict) -> list:
+    """
+    wrapper for list conversion
+    :param usb_dict: usb dictionary
+    :return: list of usb devices for tui print
+    """
+    devices = []
+    for usb in usb_dict.values():
+        devices.append(usb)
+    return devices
 
 
 def get_usb_size(path: str) -> int:
@@ -91,7 +99,8 @@ def fetch_images(iso_dir: str) -> list:
             has_no_cat = True
             image = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir+"/"+file],
                                        stdout=subprocess.PIPE)).split("stdout=b'")[1].split()
-            no_cat[image_num] = Image(image[8][:len(image[8])-4].split("/")[5], image[4], get_rec_size(image[4]), '')
+            no_cat[image_num] = Image(image[8][:len(image[8])-4].split("/")[5], image[4], get_rec_size(image[4]), '',
+                                      image_num)
             dirs.remove(file)
             image_num += 1
 
@@ -107,7 +116,7 @@ def fetch_images(iso_dir: str) -> list:
 
         for image in images:
             image = image.split()
-            images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category)
+            images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category, image_num)
             image_num += 1
 
         categories.append(Category(category, images_dict))
@@ -218,30 +227,33 @@ def calculate_block_size(usb_path: str) -> str:
     return size
 
 
-def write_to_device(image_name: str, usb_path: str, iso_dir_path: str, block: str, img_size: str):
+def write_to_device(image_name: str, usb_path: str, block: str, img_size: str, pbar: bool):
     """
     Function to take the gathered information and perform the write
     using dd
     :param image_name: name of image to write
     :param usb_path: path to usb device
-    :param iso_dir_path: path to iso
     :param block block size
     :param img_size size of selected image
+    :param pbar if true progressbar thread will run
     :return: None
     """
 
-    full_iso_path = iso_dir_path+"/"+image_name
+    full_iso_path = get_path()+"/"+image_name
     cmds = shlex.split("sudo dd if="+full_iso_path+" of="+usb_path+" bs="+block+" status=progress oflag=sync")
-    size = int(img_size)
 
-    p1 = threading.Thread(name='dd_subprocess', target=dd, args=(cmds, ))
-    p2 = threading.Thread(name='dd_progress_bar', target=dd_progress_bar, args=(size, ))
+    if pbar:
+        size = int(img_size)
+        p1 = threading.Thread(name='dd_subprocess', target=dd, args=(cmds, ))
+        p2 = threading.Thread(name='dd_progress_bar', target=dd_progress_bar, args=(size, ))
 
-    p1.start()  # threads for dd and the progress bar
-    p2.start()
+        p1.start()  # threads for dd and the progress bar
+        p2.start()
 
-    p1.join()
-    p2.join()
+        p1.join()
+        p2.join()
+    else:
+        dd(cmds)
 
     subprocess.run(["sync"])
 
@@ -262,22 +274,25 @@ def dd(cmds):
     d.communicate()
     d.wait()
     log.close()
-    subprocess.run(["sudo", "rm", "-rf", file])
+    subprocess.run(["sudo", "rm", "-rf", file]) # Leave the log
 
 
-def dd_status(file: str, img_size: int) -> float:
+def dd_status(img_size: int) -> float:
     """
     function to read the output file of dd and convert it
     to a percent completion
-    :param file: file location of dd.log to read output
     :param img_size: size of the image
     :return: percent completion of dd
     """
+    config = configparser.ConfigParser()
+    config.read('lluv.conf')
+
+    con = config['configuration']['dd_prog_location']  # log location
     next_line = None
     try:
-        file = open(file)
+        file = open(con)
     except FileNotFoundError:
-        print("DD log not found")
+        return 0.0
     line_num = 0
     while True:
         if line_num != 0:
@@ -342,16 +357,12 @@ def dd_progress_bar(img_size: int):
     :param img_size: size of selected image in MB
     :return:
     """
-    config = configparser.ConfigParser()
-    config.read('lluv.conf')
-
-    file = config['configuration']['dd_prog_location']  # log location
 
     sleep(1)
 
-    percent = dd_status(file, img_size)
+    percent = dd_status(img_size)
     while percent != 100:
-        percent = dd_status(file, img_size)
+        percent = dd_status(img_size)
         sys.stdout.write("\r"+generate_status_bar(percent, img_size))
         sleep(0.5)
     print("\n")
