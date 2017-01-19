@@ -334,9 +334,6 @@ class SelectForm(npyscreen.ActionForm):
             self.full_reset()
 
     def adjust_widgets(self):
-        # Write complete pop
-        if self.parentApp.IS_DONE_WRITE is True:
-            self.aux_pop("WRITE DONE", "DONE")
         # Check
         if self.parentApp.selected_category is None:
             self.img.editable = False
@@ -453,6 +450,12 @@ class SelectForm(npyscreen.ActionForm):
         self.block_check.value = [0]
         self.written.value = "0 / 0 MB"
         self.bs_slide.editable = False
+        self.unlock()
+
+    def unlock(self):
+        self.cat.editable = True
+        self.usb.editable = True
+        self.block_check.editable = True
 
     def spawn_autobs_pop(self):
         message = "You have selected auto block size. This should work on your storage device if it is" \
@@ -505,7 +508,6 @@ class LluvTui(npyscreen.StandardApp):
         self.activate_bs_slider = True
         self.haspoped = False
         self.IS_WRITING = False
-        self.IS_DONE_WRITE = False
         self.running = False
         self.waited_a_sec = False
 
@@ -538,7 +540,6 @@ class LluvTui(npyscreen.StandardApp):
         self.activate_bs_slider = True
         self.haspoped = False
         self.IS_WRITING = False
-        self.IS_DONE_WRITE = False
         self.running = False
         self.waited_a_sec = False
 
