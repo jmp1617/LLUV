@@ -9,8 +9,30 @@ import shlex
 import math
 import sys
 import threading
+import os
 from time import sleep
 from lluv_classes import *
+
+
+def check_config() -> bool:
+    """
+    function to check for .lluvrc in the users home dir
+    if its not there, create one
+    :return:
+    """
+    path_to_rc = os.path.expanduser("~")
+    for file in os.listdir(path_to_rc):
+        if file == ".lluvrc":
+            return True
+
+    # File does not exist
+    subprocess.run(shlex.split("sudo cp .lluvrc " + path_to_rc))
+    return True
+
+
+def get_config() -> str:
+    if check_config():
+        return os.path.expanduser("~")+"/.lluvrc"
 
 
 def get_path() -> str:
@@ -19,7 +41,7 @@ def get_path() -> str:
     :return: String path to iso
     """
     config = configparser.ConfigParser()
-    config.read('lluv.conf')
+    config.read(get_config())
     return config['path_to_images']['path']
 
 
@@ -34,7 +56,7 @@ def fetch_usb() -> dict:
     usb_num = 1
 
     config = configparser.ConfigParser()  # parse the config for ignored devices
-    config.read('lluv.conf')
+    config.read(get_config())
     for key in config['dev_to_ignore']:
         ignore.append(str(key).upper())
 
@@ -99,8 +121,7 @@ def fetch_images(iso_dir: str) -> list:
             has_no_cat = True
             image = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir+"/"+file],
                                        stdout=subprocess.PIPE)).split("stdout=b'")[1].split()
-            no_cat[image_num] = Image(image[8][:len(image[8])-4].split("/")[5], image[4], get_rec_size(image[4]), '',
-                                      image_num)
+            no_cat[image_num] = Image(image[8][:len(image[8])-4].split("/")[5], image[4], get_rec_size(image[4]), '')
             dirs.remove(file)
             image_num += 1
 
@@ -116,7 +137,7 @@ def fetch_images(iso_dir: str) -> list:
 
         for image in images:
             image = image.split()
-            images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category, image_num)
+            images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category)
             image_num += 1
 
         categories.append(Category(category, images_dict))
@@ -146,7 +167,7 @@ def get_rec_size(size: str) -> str:
     :return: rec_size  the recommended size in GB
     """
     config = configparser.ConfigParser()  # parse the config for ignored devices
-    config.read('lluv.conf')
+    config.read(get_config())
 
     leeway = int(config['configuration']['leeway'])  # Mb  leeway in usb size
 
@@ -184,7 +205,7 @@ def calculate_block_size(usb_path: str) -> str:
     size = ''
 
     config = configparser.ConfigParser()
-    config.read('lluv.conf')
+    config.read(get_config())
 
     mount_path = config['configuration']['mount']  # mount point
 
@@ -265,7 +286,7 @@ def dd(cmds):
     :return:
     """
     config = configparser.ConfigParser()
-    config.read('lluv.conf')
+    config.read(get_config())
 
     file = config['configuration']['dd_prog_location']  # log location
 
@@ -285,7 +306,7 @@ def dd_status(img_size: int) -> float:
     :return: percent completion of dd
     """
     config = configparser.ConfigParser()
-    config.read('lluv.conf')
+    config.read(get_config())
 
     con = config['configuration']['dd_prog_location']  # log location
     next_line = None
