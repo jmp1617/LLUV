@@ -1,16 +1,17 @@
+# Specify a path to the image directory here
 [path_to_images]
-path = /home/jacob/Git/ISODIRTEST
+path = /
 
-#Put devices you wish to ignore from storage scan here
+#Put devices you wish to ignore from storage device scan here
 #OS disks will automatically be ignored
+# EX: "TOSHIBA MQ01ABD1 = true"
 [dev_to_ignore]
-TOSHIBA MQ01ABD1 = true
-WDC WD10SPCX-75K = true
+
 
 #leeway in usb size, a positive number will add that amount to the iso size as leeway
 #mount - the mount location for block size testing
-#dd_prog_location - the output file for dd status
+#dd_prog_location - the output file for lluv dd status
 [configuration]
 leeway = 200
 mount: /mnt/test_blk
-dd_prog_location: /home/jacob/Git/L.L.U.V./dd.log
+dd_prog_location: /tmp/lluv_dd.log
