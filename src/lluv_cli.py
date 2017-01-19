@@ -64,18 +64,18 @@ def main():
 
                 key_num = 1
                 for key, device in p_usb_devices.items():
-                    print("\t", key, ") ", device.get_name(), "-", str(int(device.get_size())/1000000) + "MB")
+                    print("\t", key, ") ", device.get_name(), "-", str(int(device.get_size()) / 1000000) + "MB")
                     key_num = key
-                print("\t", key_num+1, ")  Refresh Storage Devices")
+                print("\t", key_num + 1, ")  Refresh Storage Devices")
                 print("\t 0 )  QUIT")
 
                 try:
                     choice = int(input("\nlluv -> "))
 
-                    if choice < 0 or choice > (key_num+1):
-                        print("\nNot a valid number, choose a number 0 -", key_num+1, "\n")
+                    if choice < 0 or choice > (key_num + 1):
+                        print("\nNot a valid number, choose a number 0 -", key_num + 1, "\n")
                         done_step_one = False
-                    elif choice == key_num+1:
+                    elif choice == key_num + 1:
                         print("\nRefreshing Devices...")
                         p_usb_devices = fetch_usb()
                         print("Done")
@@ -86,7 +86,7 @@ def main():
                         selected_usb = choice
 
                 except ValueError:
-                    print("\nNot a number, choose a number 0 -", key_num+1, "\n")
+                    print("\nNot a number, choose a number 0 -", key_num + 1, "\n")
                     done_step_one = False
 
             while not done_step_two and done_step_one:
@@ -100,7 +100,7 @@ def main():
 
                 key_num = 1
                 for cat in categories:
-                    print("\t"+cat.get_name())
+                    print("\t" + cat.get_name())
                     for key, image in cat.get_images().items():
                         print("\t\t", key, ") ", image.get_name())
                         key_num += 1
@@ -113,15 +113,15 @@ def main():
                 try:
                     choice = int(input("\nlluv -> "))
 
-                    if choice < 0 or choice > (key_num+1):
-                        print("\nNot a valid number, choose a number 0 -", key_num+1, "\n")
+                    if choice < 0 or choice > (key_num + 1):
+                        print("\nNot a valid number, choose a number 0 -", key_num + 1, "\n")
                         done_step_two = False
                     elif choice == key_num:
                         print("\nRefreshing Images...")
                         images = fetch_images(iso_dir_path)
                         print("Done")
                         done_step_two = False
-                    elif choice == key_num+1:
+                    elif choice == key_num + 1:
                         done_step_one = False
                         done_step_two = False
                         p_usb_devices = fetch_usb()
@@ -133,7 +133,7 @@ def main():
                         selected_iso = choice
 
                 except ValueError:
-                    print("\nNot a number, choose a number 0 -", key_num+1, "\n")
+                    print("\nNot a number, choose a number 0 -", key_num + 1, "\n")
                     done_step_two = False
             if selected_iso is not "" and done_step_one and done_step_two:
                 print("\nRunning Compatibility Check...")
@@ -142,7 +142,7 @@ def main():
                 else:
                     print("WARNING: devices may not be compatible")
                     print("Image recommended size:", images[selected_iso].get_rsize())
-                    print("Selected USB size:", p_usb_devices[selected_usb].get_size()/1000000000, " GB")
+                    print("Selected USB size:", p_usb_devices[selected_usb].get_size() / 1000000000, " GB")
 
                 print("\nCalculating Block Size for " + p_usb_devices[selected_usb].get_name() + "...")
 
@@ -201,10 +201,11 @@ def main():
                         final = input("(Y/N) -> ")
                         if final in ("Y", "y"):
                             print("Beginning Write...\n")
-                            write_to_device(images[selected_iso].get_cat()+"/"+images[selected_iso].get_name(),  # Account for iso category
+                            write_to_device(images[selected_iso].get_cat() + "/" + images[selected_iso].get_name(),
+                                            # Account for iso category
                                             p_usb_devices[selected_usb].get_path(),
                                             selected_block_size,
-                                            images[selected_iso].get_size()[:len(images[selected_iso].get_size())-2],
+                                            images[selected_iso].get_size()[:len(images[selected_iso].get_size()) - 2],
                                             True)
                             print("Done")
                             exit()
@@ -225,6 +226,7 @@ def main():
         print("Possible Images to write:", images)
     else:
         exit()
+
 
 if __name__ == '__main__':
     main()

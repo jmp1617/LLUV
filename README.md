@@ -34,3 +34,12 @@ For example, placing fedora images in the directory /"default img path"/Fedora w
 
 # Compatible Operating Systems
 Linux
+
+# Current Version: 1.1
+1.1 = 1/19
+    - .lluvrc
+    - bug fixes
+    - code cleanup
+
+1.0 = 1/18
+    - prototype

@@ -32,7 +32,7 @@ def check_config() -> bool:
 
 def get_config() -> str:
     if check_config():
-        return os.path.expanduser("~")+"/.lluvrc"
+        return os.path.expanduser("~") + "/.lluvrc"
 
 
 def get_path() -> str:
@@ -99,7 +99,7 @@ def get_usb_size(path: str) -> int:
     :return: size of the device
     """
     size = str(subprocess.run(["blockdev", "--getsize64", path], stdout=subprocess.PIPE)).split('\'')[7]
-    return int(size[:len(size)-2])
+    return int(size[:len(size) - 2])
 
 
 def fetch_images(iso_dir: str) -> list:
@@ -114,14 +114,14 @@ def fetch_images(iso_dir: str) -> list:
     image_num = 1
 
     dirs = str(subprocess.run(["ls", iso_dir], stdout=subprocess.PIPE)).split("'")[5].split("\\n")
-    del dirs[len(dirs)-1]
+    del dirs[len(dirs) - 1]
 
     for file in dirs:
-        if file[len(file)-4:] == '.iso':
+        if file[len(file) - 4:] == '.iso':
             has_no_cat = True
-            image = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir+"/"+file],
+            image = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + file],
                                        stdout=subprocess.PIPE)).split("stdout=b'")[1].split()
-            no_cat[image_num] = Image(image[8][:len(image[8])-4].split("/")[5], image[4], get_rec_size(image[4]), '')
+            no_cat[image_num] = Image(image[8][:len(image[8]) - 4].split("/")[5], image[4], get_rec_size(image[4]), '')
             dirs.remove(file)
             image_num += 1
 
@@ -131,9 +131,9 @@ def fetch_images(iso_dir: str) -> list:
     for category in dirs:
         images_dict = {}
 
-        images = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir+"/"+category], stdout=subprocess.PIPE))\
-            .split("stdout=b'total")[1].split("\\n")[1:]
-        del images[len(images)-1]
+        images = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + category],
+                                    stdout=subprocess.PIPE)).split("stdout=b'total")[1].split("\\n")[1:]
+        del images[len(images) - 1]
 
         for image in images:
             image = image.split()
@@ -171,12 +171,12 @@ def get_rec_size(size: str) -> str:
 
     leeway = int(config['configuration']['leeway'])  # Mb  leeway in usb size
 
-    iso_size = int(size[:(len(size)-2)]) + leeway
+    iso_size = int(size[:(len(size) - 2)]) + leeway
 
     if iso_size < 1500:
         rec_size = "2 GB"
     else:
-        rec_size = str(math.ceil(iso_size/1000)) + " GB"
+        rec_size = str(math.ceil(iso_size / 1000)) + " GB"
 
     return rec_size
 
@@ -209,22 +209,24 @@ def calculate_block_size(usb_path: str) -> str:
 
     mount_path = config['configuration']['mount']  # mount point
 
-    check_mount = str(subprocess.run(shlex.split("awk -v needle=\""+usb_path+"1\" '$1==needle {print $2}' "
-                                                 "/proc/mounts"), stdout=subprocess.PIPE)).split()[8]  # check kernel
+    check_mount = str(subprocess.run(shlex.split("awk -v needle=\"" + usb_path + "1\" '$1==needle {print $2}' "
+                                                                                 "/proc/mounts"),
+                                     stdout=subprocess.PIPE)).split()[8]  # check kernel
     cur_mount_point = (check_mount.split("'")[1]).strip("\\n")
     if cur_mount_point != '':  # if the drive is already mounted
         init_umount = str(subprocess.run(["umount", cur_mount_point], stderr=subprocess.PIPE)).split("'")
         if init_umount[5] != '':  # Could not un mount for some reason
             return size
 
-    errmount = str(subprocess.run(["mount", usb_path+"1", mount_path], stderr=subprocess.PIPE)).split("'")
-    print(errmount[7])
+    errmount = str(subprocess.run(["mount", usb_path + "1", mount_path],
+                                  stderr=subprocess.PIPE,
+                                  stdout=None)).split("'")
     if errmount[7] == '':  # begin test if there are no errors
         test_file_size = 134217728  # 128 mb
         b_size = 65536
-        count = test_file_size//b_size  # number of segment copies
+        count = test_file_size // b_size  # number of segment copies
 
-        subprocess.run(["dd", "if=/dev/urandom", "of="+mount_path+"/temp", "bs="+str(b_size), "count=" +
+        subprocess.run(["dd", "if=/dev/urandom", "of=" + mount_path + "/temp", "bs=" + str(b_size), "count=" +
                         str(count)],
                        stderr=subprocess.PIPE)  # write a bunch of random bits to the mount path
 
@@ -234,14 +236,14 @@ def calculate_block_size(usb_path: str) -> str:
         best_speed = -1
         best_size = ""
         for block_size in block_sizes.keys():
-            out = str(subprocess.run(["dd", "if="+mount_path+"/temp", "of=/dev/null", "bs="+str(block_size)],
+            out = str(subprocess.run(["dd", "if=" + mount_path + "/temp", "of=/dev/null", "bs=" + str(block_size)],
                                      stderr=subprocess.PIPE)).split()  # write from the drive to dev null to test speed
-            result = out[len(out)-2]
+            result = out[len(out) - 2]
             if float(result) > best_speed:
                 best_speed = float(result)
                 best_size = block_size
 
-        subprocess.run(["rm", "-rf", mount_path+"/temp"], stderr=None)  # remove the created test file
+        subprocess.run(["rm", "-rf", mount_path + "/temp"], stderr=None)  # remove the created test file
         subprocess.run(["umount", mount_path])  # and unmount
         size = block_sizes[best_size]
 
@@ -260,13 +262,13 @@ def write_to_device(image_name: str, usb_path: str, block: str, img_size: str, p
     :return: None
     """
 
-    full_iso_path = get_path()+"/"+image_name
-    cmds = shlex.split("dd if="+full_iso_path+" of="+usb_path+" bs="+block+" status=progress oflag=sync")
+    full_iso_path = get_path() + "/" + image_name
+    cmds = shlex.split("dd if=" + full_iso_path + " of=" + usb_path + " bs=" + block + " status=progress oflag=sync")
 
     if pbar:
         size = int(img_size)
-        p1 = threading.Thread(name='dd_subprocess', target=dd, args=(cmds, ))
-        p2 = threading.Thread(name='dd_progress_bar', target=dd_progress_bar, args=(size, ))
+        p1 = threading.Thread(name='dd_subprocess', target=dd, args=(cmds,))
+        p2 = threading.Thread(name='dd_progress_bar', target=dd_progress_bar, args=(size,))
 
         p1.start()  # threads for dd and the progress bar
         p2.start()
@@ -333,9 +335,9 @@ def dd_status(img_size: int) -> float:
     if len(last_line) > 1:
         current_write = last_line[2][1:]
         if last_line[3][:2] == "MB":
-            percent_complete = (float(current_write)/img_size)*100
+            percent_complete = (float(current_write) / img_size) * 100
         elif last_line[3][:2] == "GB":
-            percent_complete = (float(current_write)*1000 / img_size) * 100
+            percent_complete = (float(current_write) * 1000 / img_size) * 100
         else:
             percent_complete = 0.0
         file.close()
@@ -356,17 +358,17 @@ def generate_status_bar(percent: float, img_size: int):
     :return: progress bar
     """
     bar_length = 50
-    number_bars = round((int(str(percent).split(".")[0]))/(100/bar_length))  # calculate number of bars
+    number_bars = round((int(str(percent).split(".")[0])) / (100 / bar_length))  # calculate number of bars
     progress_bar = "["
 
-    current_write = img_size*(percent/100)
+    current_write = img_size * (percent / 100)
 
     for i in range(number_bars):
-        if i == number_bars-1:
+        if i == number_bars - 1:
             progress_bar += ">"
         else:
             progress_bar += "="
-    for i in range(bar_length-number_bars):
+    for i in range(bar_length - number_bars):
         progress_bar += " "
     return progress_bar + "] " + \
         str(round(percent)) + "% - " + str(round(current_write)) + "/" + str(img_size) + " MB Written"
@@ -384,6 +386,6 @@ def dd_progress_bar(img_size: int):
     percent = dd_status(img_size)
     while percent != 100:
         percent = dd_status(img_size)
-        sys.stdout.write("\r"+generate_status_bar(percent, img_size))
+        sys.stdout.write("\r" + generate_status_bar(percent, img_size))
         sleep(0.5)
     print("\n")
