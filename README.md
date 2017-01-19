@@ -18,7 +18,7 @@ Awk - for testing mount location <br />
 **sudo python3.5 lluv_tui.py** 
 
 # The TUI
-Written using the [npyscreen](https://https://github.com/pfalcon-mirrors/npyscreen "npyscreen") library.
+Written using the [npyscreen](https://github.com/pfalcon-mirrors/npyscreen "npyscreen") library.
 The TUI was designed to be used as a kiosk and therefore has no quit option <br />
 (use CTRL-C) and must be used in larger terminal formats.
 
