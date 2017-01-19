@@ -26,7 +26,7 @@ def check_config() -> bool:
             return True
 
     # File does not exist
-    subprocess.run(shlex.split("sudo cp .lluvrc " + path_to_rc))
+    subprocess.run(shlex.split("cp .lluvrc " + path_to_rc))
     return True
 
 
@@ -213,18 +213,18 @@ def calculate_block_size(usb_path: str) -> str:
                                                  "/proc/mounts"), stdout=subprocess.PIPE)).split()[8]  # check kernel
     cur_mount_point = (check_mount.split("'")[1]).strip("\\n")
     if cur_mount_point != '':  # if the drive is already mounted
-        init_umount = str(subprocess.run(["sudo", "umount", cur_mount_point], stderr=subprocess.PIPE)).split("'")
-        if init_umount[7] != '':  # Could not un mount for some reason
+        init_umount = str(subprocess.run(["umount", cur_mount_point], stderr=subprocess.PIPE)).split("'")
+        if init_umount[6] != '':  # Could not un mount for some reason
             return size
 
-    errmount = str(subprocess.run(["sudo", "mount", usb_path+"1", mount_path], stderr=subprocess.PIPE)).split("'")
+    errmount = str(subprocess.run(["mount", usb_path+"1", mount_path], stderr=subprocess.PIPE)).split("'")
 
-    if errmount[9] == '':  # begin test if there are no errors
+    if errmount[8] == '':  # begin test if there are no errors
         test_file_size = 134217728  # 128 mb
         b_size = 65536
         count = test_file_size//b_size  # number of segment copies
 
-        subprocess.run(["sudo", "dd", "if=/dev/urandom", "of="+mount_path+"/temp", "bs="+str(b_size), "count=" +
+        subprocess.run(["dd", "if=/dev/urandom", "of="+mount_path+"/temp", "bs="+str(b_size), "count=" +
                         str(count)],
                        stderr=subprocess.PIPE)  # write a bunch of random bits to the mount path
 
@@ -241,8 +241,8 @@ def calculate_block_size(usb_path: str) -> str:
                 best_speed = float(result)
                 best_size = block_size
 
-        subprocess.run(["sudo", "rm", "-rf", mount_path+"/temp"], stderr=None)  # remove the created test file
-        subprocess.run(["sudo", "umount", mount_path])  # and unmount
+        subprocess.run(["rm", "-rf", mount_path+"/temp"], stderr=None)  # remove the created test file
+        subprocess.run(["umount", mount_path])  # and unmount
         size = block_sizes[best_size]
 
     return size
@@ -261,7 +261,7 @@ def write_to_device(image_name: str, usb_path: str, block: str, img_size: str, p
     """
 
     full_iso_path = get_path()+"/"+image_name
-    cmds = shlex.split("sudo dd if="+full_iso_path+" of="+usb_path+" bs="+block+" status=progress oflag=sync")
+    cmds = shlex.split("dd if="+full_iso_path+" of="+usb_path+" bs="+block+" status=progress oflag=sync")
 
     if pbar:
         size = int(img_size)
