@@ -6,12 +6,17 @@ is allocated and writable, a block size will automatically be generated for  <br
 optimal performance.
 
 **LLUV** is designed to run in a kiosk fashion, and read from large lists of images, both <br />
-local and remote.
+local and remote.<br />
+
+Note: The DD process is completely isolated from LLUV, therefor, if a drive is corrupted, <br />
+it was probably DD's alter ego; Disk Destroyer.
 
 # Dependencies
 lsscsi - for discovering usb storage devices <br />
 DD - for writing the image <br />
 Awk - for testing mount location <br />
+
+Note: lluv_simple_cli has no dependencies besides dd itself
 
 # Run
 **sudo python3.5 lluv_cli.py** (_needs root for storage device access_) <br />
