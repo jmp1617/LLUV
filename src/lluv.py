@@ -58,13 +58,21 @@ def fetch_usb() -> dict:
     usb_dict = {}  # dict to hold data about usb devices
     ignore = []  # hold list of devices to be ignored
     usb_num = 1
+    out = ""
 
     config = configparser.ConfigParser()  # parse the config for ignored devices
     config.read(get_config())
     for key in config['dev_to_ignore']:
         ignore.append(str(key).upper())
 
-    out = ((str(subprocess.run(["lsscsi"], stdout=subprocess.PIPE)))[57:]).split(' \\n')
+    try:
+        out = ((str(subprocess.run(["lsscsi"],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STD_ERROR_HANDLE)))[57:]).split(' \\n')
+    except subprocess.STD_ERROR_HANDLE:
+        print("Is lsscsi installed?")
+        quit()
+
     out.remove("')")
 
     for line in out:
