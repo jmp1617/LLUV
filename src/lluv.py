@@ -35,6 +35,19 @@ def get_config() -> str:
         return os.path.expanduser("~") + "/.lluvrc"
 
 
+def set_image_path(path: str):
+    """
+    Set the path of the images
+    :param path: path to images
+    :return:
+    """
+    config = configparser.RawConfigParser()
+    config.read(get_config())
+    config.set('path_to_images', 'path', path)
+    with open(get_config(), 'w') as conf:
+        config.write(conf)
+
+
 def get_path() -> str:
     """
     Function to parse the config file for the path to the ISO dir
@@ -71,7 +84,7 @@ def fetch_usb() -> dict:
                                    stderr=subprocess.STDOUT)))[57:]).split(' \\n')
     except Exception:
         print("Is lsscsi installed?")
-        quit()
+        exit()
 
     out.remove("')")
 
@@ -110,8 +123,13 @@ def get_usb_size(path: str) -> int:
     :param path: /dev/sda or whatever
     :return: size of the device
     """
-    size = str(subprocess.run(["blockdev", "--getsize64", path], stdout=subprocess.PIPE)).split('\'')[7]
-    return int(size[:len(size) - 2])
+    size = str(subprocess.run(["blockdev", "--getsize64", path],
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.DEVNULL)).split('\'')[7]
+    try:
+        return int(size[:len(size) - 2])
+    except ValueError:  # If the device could not be read for some reason
+        return 0
 
 
 def fetch_images(iso_dir: str) -> list:
@@ -129,7 +147,7 @@ def fetch_images(iso_dir: str) -> list:
 
     dirs = str(potential_path).split("'")[5].split("\\n")
 
-    if len(dirs) == 1 and dirs[0] == '':  # if there wasn't a path supplied or the path couldnt be found
+    if len(dirs) == 1 and dirs[0] == '':  # if there wasn't a path supplied or the path couldn't be found
         print("There doesnt seem to be a path or a correct path in the config for an iso dir. \n"
               "The .lluvrc is located at: "+get_config())
         exit()
@@ -186,7 +204,7 @@ def fetch_images(iso_dir: str) -> list:
             categories.append(Category(category, images_dict))
 
         if len(categories) is 0:    # if there were no categories found
-            categories.append(Category("- There were no categories -", {}))
+            categories.append(Category("- No Categories -", {}))
 
     categories.sort(key=lambda x: x.get_name())   # sort the categories alphabetically
     return categories
@@ -436,3 +454,4 @@ def dd_progress_bar(img_size: int):
         sys.stdout.write("\r" + generate_status_bar(percent, img_size))
         sleep(0.5)
     print("\n")
+

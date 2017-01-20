@@ -33,6 +33,7 @@ def main():
     selected_usb = ""
     selected_iso = ""
     selected_block_size = "512K"
+    check_config()
 
     print("\nWELCOME TO THE L.L.U.V. (Linux Live USB Vending) MACHINE CLI")
     print("by Jacob Potter (jpotter)\n")
