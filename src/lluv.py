@@ -134,42 +134,43 @@ def fetch_images(iso_dir: str) -> list:
               "The .lluvrc is located at: "+get_config())
         exit()
 
-    del dirs[len(dirs) - 1]
+    del dirs[len(dirs) - 1]  # remove trailing parenthesis
 
-    index_count = 0
-    files_for_deletion = []
+    index_count = 0  # keep track of the index of directory
+    files_for_deletion = []  # store all indexes planned on being deleted
     for file in dirs:  # filter out all non iso and dirs
-        if not os.path.isdir(iso_dir+"/"+file) and file[len(file) - 4:] != '.iso':
-            files_for_deletion.append(index_count)
+        if not os.path.isdir(iso_dir+"/"+file) and file[len(file) - 4:] != '.iso':  # if its not dir or iso
+            files_for_deletion.append(index_count)  # prepare to delete it
         index_count += 1
 
     index_count = 0
-    for file in dirs:  # get non cat iso
+    for file in dirs:  # get iso that are not in a subdir - aka no category
         if file[len(file) - 4:] == '.iso':
-            has_no_cat = True
+            has_no_cat = True   # mark that there will be a no-category category
             image = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + file],
                                        stdout=subprocess.PIPE)).split("stdout=b'")[1].split()
             no_cat[image_num] = Image(image[8][:len(image[8]) - 4].split("/")[5], image[4], get_rec_size(image[4]), '')
-            if index_count not in files_for_deletion:
+            if index_count not in files_for_deletion:   # if not already to be deleted ( should be not in there)
                 files_for_deletion.append(index_count)
             index_count += 1
             image_num += 1
 
-    # delete selected iso
+    # delete selected files
     files_for_deletion.reverse()
-    for index in files_for_deletion:  # reverse so that the correct indexes are deleted
+    for index in files_for_deletion:  # reverse so that the correct files are deleted
         del dirs[index]
 
     if has_no_cat:
-        categories.append(Category("No-Category", no_cat))
+        categories.append(Category("No-Category", no_cat))  # create the no-cat category
 
+    # go through the remaining dirs and create relevant category objects
     for category in dirs:
         images_dict = {}
 
         p_images = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + category],
                                       stdout=subprocess.PIPE)).split("stdout=b'")
 
-        if (category+" ->") not in str(p_images[0]):  # probably a link - if not a sym link
+        if (category+" ->") not in str(p_images[0]):  # if not a sym link
 
             images = p_images[1].split("\\n")[1:]
 
@@ -181,13 +182,13 @@ def fetch_images(iso_dir: str) -> list:
                     images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category)
                     image_num += 1
 
-        if len(images_dict) is not 0:
+        if len(images_dict) is not 0:  # if there were some images in the dir
             categories.append(Category(category, images_dict))
 
-        if len(categories) is 0:
-            categories.append(Category("- There were no images -", {}))
+        if len(categories) is 0:    # if there were no categories found
+            categories.append(Category("- There were no categories -", {}))
 
-    categories.sort(key=lambda x: x.get_name())
+    categories.sort(key=lambda x: x.get_name())   # sort the categories alphabetically
     return categories
 
 
