@@ -1,3 +1,6 @@
+"""
+TUI for lluv
+"""
 import npyscreen
 import lluv
 import multiprocessing

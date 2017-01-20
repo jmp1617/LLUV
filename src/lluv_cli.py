@@ -206,7 +206,7 @@ def main():
                                             p_usb_devices[selected_usb].get_path(),
                                             selected_block_size,
                                             images[selected_iso].get_size()[:len(images[selected_iso].get_size()) - 2],
-                                            True)
+                                            True, "")
                             print("Done")
                             exit()
                         else:

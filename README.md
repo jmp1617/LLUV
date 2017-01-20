@@ -15,7 +15,8 @@ Awk - for testing mount location <br />
 
 # Run
 **sudo python3.5 lluv_cli.py** (_needs root for storage device access_) <br />
-**sudo python3.5 lluv_tui.py** 
+**sudo python3.5 lluv_tui.py** <br />
+**sudo python3.5 lluv_simple_cli.py** A simple lluv cli. Basically a simplified dd with a progress bar <br />
 
 # The TUI
 Written using the [npyscreen](https://github.com/pfalcon-mirrors/npyscreen "npyscreen") library.

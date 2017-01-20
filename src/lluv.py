@@ -68,8 +68,8 @@ def fetch_usb() -> dict:
     try:
         out = ((str(subprocess.run(["lsscsi"],
                                    stdout=subprocess.PIPE,
-                                   stderr=subprocess.STD_ERROR_HANDLE)))[57:]).split(' \\n')
-    except subprocess.STD_ERROR_HANDLE:
+                                   stderr=subprocess.STDOUT)))[57:]).split(' \\n')
+    except Exception:
         print("Is lsscsi installed?")
         quit()
 
@@ -295,7 +295,7 @@ def calculate_block_size(usb_path: str) -> str:
     return size
 
 
-def write_to_device(image_name: str, usb_path: str, block: str, img_size: str, pbar: bool):
+def write_to_device(image_name: str, usb_path: str, block: str, img_size: str, pbar: bool, full_iso_path: str):
     """
     Function to take the gathered information and perform the write
     using dd
@@ -304,10 +304,11 @@ def write_to_device(image_name: str, usb_path: str, block: str, img_size: str, p
     :param block block size
     :param img_size size of selected image
     :param pbar if true progressbar thread will run
+    :param full_iso_path if this populated with a full iso path, will override image name
     :return: None
     """
-
-    full_iso_path = get_path() + "/" + image_name
+    if full_iso_path == "":
+        full_iso_path = get_path() + "/" + image_name
     cmds = shlex.split("dd if=" + full_iso_path + " of=" + usb_path + " bs=" + block + " status=progress oflag=sync")
 
     if pbar:
