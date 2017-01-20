@@ -42,7 +42,11 @@ def get_path() -> str:
     """
     config = configparser.ConfigParser()
     config.read(get_config())
-    return config['path_to_images']['path']
+    path = config['path_to_images']['path']
+    if len(path) > 1 and path[-1] == "/":
+        return path[:len(path)-1]
+    else:
+        return path
 
 
 def fetch_usb() -> dict:
@@ -117,20 +121,36 @@ def fetch_images(iso_dir: str) -> list:
 
     dirs = str(potential_path).split("'")[5].split("\\n")
 
-    if len(dirs) == 1 and dirs[0] == '':  # if there wasn't a path supplied
-        print("There doesnt seem to be a path in the config for an iso dir. The .lluvrc is located at: "+get_config())
+    if len(dirs) == 1 and dirs[0] == '':  # if there wasn't a path supplied or the path couldnt be found
+        print("There doesnt seem to be a path or a correct path in the config for an iso dir. \n"
+              "The .lluvrc is located at: "+get_config())
         exit()
 
     del dirs[len(dirs) - 1]
 
-    for file in dirs:
+    index_count = 0
+    files_for_deletion = []
+    for file in dirs:  # filter out all non iso and dirs
+        if not os.path.isdir(iso_dir+"/"+file) and file[len(file) - 4:] != '.iso':
+            files_for_deletion.append(index_count)
+        index_count += 1
+
+    index_count = 0
+    for file in dirs:  # get non cat iso
         if file[len(file) - 4:] == '.iso':
             has_no_cat = True
             image = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + file],
                                        stdout=subprocess.PIPE)).split("stdout=b'")[1].split()
             no_cat[image_num] = Image(image[8][:len(image[8]) - 4].split("/")[5], image[4], get_rec_size(image[4]), '')
-            dirs.remove(file)
+            if index_count not in files_for_deletion:
+                files_for_deletion.append(index_count)
+            index_count += 1
             image_num += 1
+
+    # delete selected iso
+    files_for_deletion.reverse()
+    for index in files_for_deletion:  # reverse so that the correct indexes are deleted
+        del dirs[index]
 
     if has_no_cat:
         categories.append(Category("No-Category", no_cat))
@@ -139,9 +159,9 @@ def fetch_images(iso_dir: str) -> list:
         images_dict = {}
 
         p_images = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + category],
-                                      stdout=subprocess.PIPE)).split("stdout=b'total")
+                                      stdout=subprocess.PIPE)).split("stdout=b'")
 
-        if (category+" ->") not in str(p_images[0]):  # probably a link
+        if (category+" ->") not in str(p_images[0]):  # probably a link - if not a sym link
 
             images = p_images[1].split("\\n")[1:]
 
