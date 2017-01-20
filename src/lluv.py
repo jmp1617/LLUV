@@ -113,7 +113,14 @@ def fetch_images(iso_dir: str) -> list:
     has_no_cat = False
     image_num = 1
 
-    dirs = str(subprocess.run(["ls", iso_dir], stdout=subprocess.PIPE)).split("'")[5].split("\\n")
+    potential_path = subprocess.run(["ls", iso_dir], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+
+    dirs = str(potential_path).split("'")[5].split("\\n")
+
+    if len(dirs) == 1 and dirs[0] == '':  # if there wasn't a path supplied
+        print("There doesnt seem to be a path in the config for an iso dir. The .lluvrc is located at: "+get_config())
+        exit()
+
     del dirs[len(dirs) - 1]
 
     for file in dirs:
@@ -131,16 +138,26 @@ def fetch_images(iso_dir: str) -> list:
     for category in dirs:
         images_dict = {}
 
-        images = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + category],
-                                    stdout=subprocess.PIPE)).split("stdout=b'total")[1].split("\\n")[1:]
-        del images[len(images) - 1]
+        p_images = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + category],
+                                      stdout=subprocess.PIPE)).split("stdout=b'total")
 
-        for image in images:
-            image = image.split()
-            images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category)
-            image_num += 1
+        if (category+" ->") not in str(p_images[0]):  # probably a link
 
-        categories.append(Category(category, images_dict))
+            images = p_images[1].split("\\n")[1:]
+
+            del images[len(images) - 1]
+
+            for image in images:
+                image = image.split()
+                if image[8][len(image[8]) - 4:] == ".iso":
+                    images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category)
+                    image_num += 1
+
+        if len(images_dict) is not 0:
+            categories.append(Category(category, images_dict))
+
+        if len(categories) is 0:
+            categories.append(Category("- There were no images -", {}))
 
     categories.sort(key=lambda x: x.get_name())
     return categories

@@ -406,12 +406,11 @@ class SelectForm(npyscreen.ActionForm):
     # however, will never be called if the user likes spamming keys at alarming rates
     def while_waiting(self):
         # Refresh usb listing and image listing then redisplay specified widgets
-        self.parentApp.refresh()    # refresh parent
-        self.cat.values = self.parentApp.img_categories  # TODO make it handle selected drive then pulled out
+        self.parentApp.refresh()    # refresh parent  # TODO make it handle selected drive then pulled out
         self.usb.values = self.parentApp.usb_list
         self.update_displays()
         # Check to see if the write process was complete
-        if self.parentApp.percent == 100: # Writing process complete
+        if self.parentApp.percent == 100:  # Writing process complete
             self.pbar.value = 100
             # Make sure 100 is displayed
             if self.parentApp.selected_image is not None:
@@ -555,7 +554,6 @@ class LluvTui(npyscreen.StandardApp):
 
     # function to refresh the usb devices
     def refresh(self):
-        self.img_categories = lluv.fetch_images(lluv.get_path())
         self.usb_list = lluv.generate_list(lluv.fetch_usb())
 
 
