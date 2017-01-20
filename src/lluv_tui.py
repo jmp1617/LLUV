@@ -144,7 +144,7 @@ class TitleForm(npyscreen.Form):
         title_block7 = " " * l_space + "     ,aa,_88         ,aa,_88            88        88      `8,     ,8'  "
         title_block8 = " " * l_space + "    dP\" \"88P        dP\" \"88P            88        88       Y8,   ,8P   "
         title_block9 = " " * l_space + "    Yb,_,d88b,,_    Yb,_,d88b,,_        Y8b,____,d88,       Yb,_,dP     "
-        title_block10 = " " * l_space + "     \"Y8P\"  \"Y88888  \"Y8P\"  \"Y88888      \"Y888888P\"Y8        \"Y8P\"      "
+        title_block10 = " " * l_space + "     \"Y8P\"  \"Y88888  \"Y8P\"  \"Y88888      \"Y888888P\"Y8        \"Y8P\"  "
         box = self.add(npyscreen.BoxTitle,
                        name="Welcome To",
                        max_width=105,
@@ -571,7 +571,7 @@ def lluv_write_ex(i_name, usb_path, block, i_size):
     :param i_size: size of image
     :return:
     """
-    lluv.write_to_device(i_name, usb_path, block, i_size, False)  # Backend Write
+    lluv.write_to_device(i_name, usb_path, block, i_size, False, "")  # Backend Write
 
 
 if __name__ == '__main__':

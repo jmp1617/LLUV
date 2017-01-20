@@ -37,10 +37,10 @@ For example, placing fedora images in the directory /"default img path"/Fedora w
 Linux
 
 # Current Version: 1.1
-1.1 = 1/19
-    - .lluvrc
-    - bug fixes
-    - code cleanup
+1.1 = 1/19<br />
+    - .lluvrc<br />
+    - bug fixes<br />
+    - code cleanup<br />
 
-1.0 = 1/18
-    - prototype
+1.0 = 1/18<br />
+    - prototype<br />
