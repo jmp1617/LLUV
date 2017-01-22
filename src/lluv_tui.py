@@ -6,6 +6,9 @@ import lluv
 import multiprocessing
 
 # WIDGET SUBCLASSES
+class FilePicker(npyscreen.FilenameCombo):
+    def __init__(self, *args, **keywords):
+        super(FilePicker, self).__init__(*args, **keywords)
 
 
 class ImgSel(npyscreen.MultiLine):
@@ -62,7 +65,8 @@ class TextItem(npyscreen.FixedText):
         self.editable = False
 
 # BOX WRAPPERS
-
+class FilePickerBox(npyscreen.BoxTitle):
+    _contained_widget = FilePicker
 
 class ImgSelectionBox(npyscreen.BoxTitle):
     _contained_widget = ImgSel
@@ -194,10 +198,19 @@ class SelectForm(npyscreen.ActionForm):
         self.img = self.add(ImgSelectionBox,
                             name="Select an Image",
                             max_width=70,
-                            max_height=26,
+                            max_height=22,
                             relx=35,
                             rely=15,
                             values=["- Select a Category First -"])
+        # isodir path selection widget
+        self.file_pick = self.add(FilePickerBox,
+                            name="Change which image directory the config points to :",
+                            max_width=70,
+                            relx=35,
+                            rely=38,
+                            max_height=3,
+                            value=lluv.get_path(),
+                            footer="Selection will be saved to the config")
         # progress bar - an altered slider widget
         self.pbar = self.add(ProgressBarBox,
                              max_height=3,
@@ -343,8 +356,13 @@ class SelectForm(npyscreen.ActionForm):
 
     # CALLED EVERY TIME THE USER PRESSES A BUTTON
     # will only update values to avoid slow down
-    # no redraws
+    # no redraws except path update
     def adjust_widgets(self):
+        # Check to see if the file path has been changed
+        if self.file_pick.value != lluv.get_path():  # if the path was changed
+            lluv.set_image_path(self.file_pick.value)
+            self.parentApp.img_categories = lluv.fetch_images(lluv.get_path())
+            self.cat.display()
         # The category has been selected and the parent isn't writing allow images to be altered
         if self.parentApp.selected_category is not None and not self.parentApp.IS_WRITING:
             self.img.editable = True
