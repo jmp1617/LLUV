@@ -9,6 +9,9 @@ import multiprocessing
 class FilePicker(npyscreen.FilenameCombo):
     def __init__(self, *args, **keywords):
         super(FilePicker, self).__init__(*args, **keywords)
+        self.must_exist=False
+        self.sort_by_extansion=True
+        self.select_dir=True
 
 
 class ImgSel(npyscreen.MultiLine):
@@ -67,6 +70,7 @@ class TextItem(npyscreen.FixedText):
 # BOX WRAPPERS
 class FilePickerBox(npyscreen.BoxTitle):
     _contained_widget = FilePicker
+
 
 class ImgSelectionBox(npyscreen.BoxTitle):
     _contained_widget = ImgSel
@@ -361,7 +365,8 @@ class SelectForm(npyscreen.ActionForm):
         # Check to see if the file path has been changed
         if self.file_pick.value != lluv.get_path():  # if the path was changed
             lluv.set_image_path(self.file_pick.value)
-            self.parentApp.img_categories = lluv.fetch_images(lluv.get_path())
+            self.parentApp.img_categories = lluv.fetch_images(self.file_pick.value)
+            self.cat.values = self.parentApp.img_categories
             self.cat.display()
         # The category has been selected and the parent isn't writing allow images to be altered
         if self.parentApp.selected_category is not None and not self.parentApp.IS_WRITING:
