@@ -454,4 +454,3 @@ def dd_progress_bar(img_size: int):
         sys.stdout.write("\r" + generate_status_bar(percent, img_size))
         sleep(0.5)
     print("\n")
-

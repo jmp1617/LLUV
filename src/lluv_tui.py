@@ -4,6 +4,9 @@ TUI for lluv
 import npyscreen
 import lluv
 import multiprocessing
+import os
+import sys
+from time import sleep
 
 # WIDGET SUBCLASSES
 class FilePicker(npyscreen.FilenameCombo):
@@ -432,7 +435,7 @@ class SelectForm(npyscreen.ActionForm):
     # however, will never be called if the user likes spamming keys at alarming rates
     def while_waiting(self):
         # Refresh usb listing and image listing then redisplay specified widgets
-        self.parentApp.refresh()    # refresh parent  # TODO make it handle selected drive then pulled out
+        self.parentApp.refresh()    # refresh parent
         self.usb.values = self.parentApp.usb_list
         self.update_displays()
         # Check to see if the write process was complete
@@ -597,6 +600,9 @@ def lluv_write_ex(i_name, usb_path, block, i_size):
     lluv.write_to_device(i_name, usb_path, block, i_size, False, "")  # Backend Write
 
 
-if __name__ == '__main__':
-    multiprocessing.set_start_method('spawn')
+def start():
     LluvTui().run()
+
+
+if __name__ == '__main__':
+    start()
