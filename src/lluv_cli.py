@@ -63,7 +63,7 @@ def main():
 
                 print("STEP ONE - Select a USB storage Device:")
 
-                key_num = 1
+                key_num = 0
                 for key, device in p_usb_devices.items():
                     print("\t", key, ") ", device.get_name(), "-", str(int(device.get_size()) / 1000000) + "MB")
                     key_num = key
@@ -99,7 +99,7 @@ def main():
                 print("STEP TWO - Select an image")
                 print("Categories:")
 
-                key_num = 1
+                key_num = 0
                 for cat in categories:
                     print("\t" + cat.get_name())
                     for key, image in cat.get_images().items():
@@ -107,8 +107,8 @@ def main():
                         key_num += 1
 
                 print("\tOther Options")
-                print("\t\t", key_num, ")  Refresh Images")
-                print("\t\t", key_num + 1, ")  Go Back")
+                print("\t\t", key_num + 1, ")  Refresh Images")
+                print("\t\t", key_num + 2, ")  Go Back")
                 print("\t\t 0 )  QUIT")
 
                 try:

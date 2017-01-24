@@ -149,7 +149,7 @@ def fetch_images(iso_dir: str) -> list:
 
     if len(dirs) == 1 and dirs[0] == '':  # if there wasn't a path supplied or the path couldn't be found
         print("There doesnt seem to be a path or a correct path in the config for an iso dir. \n"
-              "The .lluvrc is located at: "+get_config())
+              "Or the dir is empty. The .lluvrc is located at: "+get_config())
         exit()
 
     del dirs[len(dirs) - 1]  # remove trailing parenthesis
