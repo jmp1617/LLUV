@@ -31,6 +31,10 @@ def check_config() -> bool:
 
 
 def get_config() -> str:
+    """
+    Function to get the convig path
+    :return: path of config
+    """
     if check_config():
         return os.path.expanduser("~") + "/.lluvrc"
 
