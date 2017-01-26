@@ -7,6 +7,7 @@ import npyscreen
 import lluv
 import multiprocessing
 import curses
+import sys
 
 # WIDGET SUBCLASSES
 class FilePicker(npyscreen.FilenameCombo):
@@ -359,7 +360,10 @@ class SelectForm(npyscreen.ActionForm):
     # IF CANCEL IS CLICKED
     def on_cancel(self):
         if not self.parentApp.IS_WRITING:  # Disable cancel button
-            self.full_reset()   # reset the form
+            # self.full_reset()   # reset the form # only if kiosk mode
+            sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=24, cols=80))
+            print("Exiting TUI")
+            exit()  # if not kiosk mode, exit the app after resizing
 
     # CALLED EVERY TIME THE USER PRESSES A BUTTON
     # will only update values to avoid slow down
