@@ -19,8 +19,16 @@ Awk - for testing mount location <br />
 Note: lluv_simple_cli has no dependencies besides dd itself
 
 # Run
-**sudo python3.5 lluv_cli.py** (_needs root for storage device access_) <br />
-**sudo python3.5 lluv_tui.py** <br />
+Note:_lluv needs root for storage device access_ <br />
+
+To start the lluv console run:<br />
+**sudo python3.5 lluvconsole.py**  This will allow an option of interfaces along with automatic<br />
+terminal resizing. <br />
+
+To run either individually: <br />
+**sudo python3.5 lluv_cli.py**  <br />
+**sudo python3.5 lluv_tui.py** Note: Terminal will not be auto resized without using lluvconsole so<br />
+the application may crash if the terminal is to small.<br />
 **sudo python3.5 lluv_simple_cli.py** A simple lluv cli. Basically a simplified dd with a progress bar <br />
 
 # The TUI
@@ -41,7 +49,11 @@ For example, placing fedora images in the directory /"default img path"/Fedora w
 # Compatible Operating Systems
 Linux
 
-# Current Version: 1.1
+# Current Version: 1.2
+1.2 = 1/26<br />
+    - lluv console <br />
+    - auto term resize <br />
+
 1.1 = 1/19<br />
     - .lluvrc<br />
     - bug fixes<br />
