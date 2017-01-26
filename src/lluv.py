@@ -156,7 +156,8 @@ def fetch_images(iso_dir: str) -> list:
               "Or the dir is empty. The .lluvrc is located at: "+get_config())
         exit()
 
-    del dirs[len(dirs) - 1]  # remove trailing parenthesis
+    if len(dirs) != 0:
+        del dirs[len(dirs) - 1]  # remove trailing parenthesis
 
     index_count = 0  # keep track of the index of directory
     files_for_deletion = []  # store all indexes planned on being deleted
@@ -196,7 +197,8 @@ def fetch_images(iso_dir: str) -> list:
 
             images = p_images[1].split("\\n")[1:]
 
-            del images[len(images) - 1]
+            if len(images) != 0:
+                del images[len(images) - 1]
 
             for image in images:
                 image = image.split()

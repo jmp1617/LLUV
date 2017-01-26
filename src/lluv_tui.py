@@ -1,12 +1,12 @@
 """
 TUI for lluv
+
+author: Jacob Potter CSH:(jpotter)
 """
 import npyscreen
 import lluv
 import multiprocessing
-import os
-import sys
-from time import sleep
+import curses
 
 # WIDGET SUBCLASSES
 class FilePicker(npyscreen.FilenameCombo):
@@ -553,8 +553,7 @@ class LluvTui(npyscreen.StandardApp):
         npyscreen.setTheme(NewTheme)  # set the theme
         self.addForm('MAIN', TitleForm, name="The CSH L.L.U.V. Machine - Page (1/2)", )  # Title form
         self.addForm('Selection', SelectForm,                                            # Main selection form
-                     name="Configure and Write - Page (2/2)",
-                     minimum_lines=47, minimum_columns=143)
+                     name="Configure and Write - Page (2/2)") # 47 x 143
 
     # while the form is waiting, if DD is working, send the event to update the progress
     def while_waiting(self):

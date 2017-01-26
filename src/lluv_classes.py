@@ -1,5 +1,7 @@
 """
 Classes for defining usb devices, images, and categories
+
+author: Jacob Potter CSH:(jpotter)
 """
 
 

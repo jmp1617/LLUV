@@ -25,7 +25,10 @@ def display_curr_choices(selected_usb: str, selected_iso: str, p_usb_devices: di
         print("Selected Image: Not Yet Selected\n")
 
 
-def main():
+def start():
+    """
+    run the CLI
+    """
     """
     main lluv routine
     :return: None
@@ -35,8 +38,6 @@ def main():
     selected_block_size = "512K"
     check_config()
 
-    print("\nWELCOME TO THE L.L.U.V. (Linux Live USB Vending) MACHINE CLI")
-    print("by Jacob Potter (jpotter)\n")
     print("Type start to begin (anything else to exit)\n")
     begin = input("lluv -> ")
     if begin == 'start':
@@ -228,6 +229,9 @@ def main():
     else:
         exit()
 
+
+def main():
+    start()
 
 if __name__ == '__main__':
     main()
