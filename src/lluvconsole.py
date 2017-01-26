@@ -8,11 +8,14 @@ author: Jacob Potter CSH:(jpotter)
 import lluv_tui
 import lluv_cli
 import lluv_simple_cli
+from time import sleep
+import sys
 
 def main():
     """
     prompt the user for a lluv interface
     """
+
     print("\nWELCOME TO THE L.L.U.V. (Linux Live USB Vending) MACHINE CLI")
     print("by Jacob Potter (jpotter)\n")
     print("1: Start TUI")
@@ -37,6 +40,8 @@ def main():
         print("Quitting")
         exit()
     if option == 1:
+        sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=47, cols=143))  # Resize the term
+        print("Starting TUI")
         lluv_tui.start()
     if option == 2:
         lluv_cli.start()
