@@ -27,8 +27,10 @@ terminal resizing. <br />
 
 To run either individually: <br />
 **sudo python3.5 lluv_cli.py**  <br />
+
 **sudo python3.5 lluv_tui.py** Note: Terminal will not be auto resized without using lluvconsole so<br />
 the application may crash if the terminal is to small.<br />
+
 **sudo python3.5 lluv_simple_cli.py** A simple lluv cli. Basically a simplified dd with a progress bar <br />
 
 # The TUI
