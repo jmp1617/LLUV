@@ -12,6 +12,9 @@ from time import sleep
 import sys
 
 def main():
+    start()
+
+def start():
     """
     prompt the user for a lluv interface
     """

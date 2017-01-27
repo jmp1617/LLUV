@@ -1,0 +1,55 @@
+CHANGES
+=======
+
+* update readme
+* Updated readme
+* Added proper exiting functionality
+* Fixed terminal resize issue
+* Added a launher for all lluv scripts
+* fixed usage
+* added block size option to lluv_simple_cli
+* Changed wording of error message
+* Documentation
+* Finished directory selector and category listing update
+* Added iso dir switch widget
+* Added means for the path to images to be updated during runtime in preperation for a path selection widget
+* updated documentation
+* update to the readme
+* Fixed missing parameter in the write tui
+* Added the simple cli
+* Added lsscsi try catch
+* Added setup.py and associated files
+* Fixed image discovery bugs
+* Changed the image discovery to only happen once a run because large image dirs can take a while to traverse
+* Updated documentation and cleaned up the TUI code
+* updated lluvrc template
+* fixed issue with block detection - index off by one
+* removed sudo from internal commands
+* Added function to check for .lluvrc in the user home dir, if its not there, create one from template
+* Delete dd.log
+* Update url
+* remove __pycache__
+* Delete dd.log
+* Added .gitignore
+* link fix
+* Fixed CLI writing parameters
+* Rearange
+* Looping complete and prototype finished
+* Fixed Prog bar jump to zero bug: Issue: bar jumped to zero before test if 100 was made sometimes
+* Repopulated Reset List and created application loop
+* Added license and updated Backend - more internal
+* General Layout for TUI completed
+* updated readme
+* updated readme
+* updated readme
+* Delete Log
+* Added category support --see readme
+* spelling errors fixed
+* updated readme
+* Fixed newlines in readme
+* ReadMe update
+* Finished the progress bar thread
+* Fixed bugs in back end and CLI such as mounting errors with block check and created a dd status log system
+* finished CLI and backend for LLUV
+* Added usb and image discovery along with compatability checks and some of the CLI
+* Initial commit
