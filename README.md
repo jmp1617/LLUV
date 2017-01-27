@@ -5,7 +5,7 @@ an easy to use user interface. The backend uses DD so use with care. If the usb 
 is allocated and writable, a block size will automatically be generated for  <br />
 optimal performance.
 
-**LLUV** is designed to run in a kiosk fashion, and read from large lists of images, both <br />
+**LLUV** was originally designed to run in a kiosk fashion, and read from large lists of images, both <br />
 local and remote.<br />
 
 Note: The DD process is completely isolated from LLUV, therefor, if a drive is corrupted, <br />
