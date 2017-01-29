@@ -20,7 +20,7 @@ def check_config() -> bool:
     if its not there, create one
     :return:
     """
-    path_to_rc = os.path.expanduser("~")
+    path_to_rc = "/etc/"
     for file in os.listdir(path_to_rc):
         if file == ".lluvrc":
             return True
@@ -36,7 +36,7 @@ def get_config() -> str:
     :return: path of config
     """
     if check_config():
-        return os.path.expanduser("~") + "/.lluvrc"
+        return "/etc/.lluvrc"
 
 
 def set_image_path(path: str):
