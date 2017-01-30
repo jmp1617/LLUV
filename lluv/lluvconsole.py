@@ -5,14 +5,15 @@ advanced CLI, or simple CLI.
 author: Jacob Potter CSH:(jpotter)
 """
 
-import lluv_tui
-import lluv_cli
-import lluv_simple_cli
-from time import sleep
+import lluv.lluv_tui as lluv_tui
+import lluv.lluv_cli as lluv_cli
+import lluv.lluv_simple_cli as lluv_simple_cli
 import sys
+
 
 def main():
     start()
+
 
 def start():
     """
@@ -26,6 +27,7 @@ def start():
     print("3: Start Simple CLI (basically dd with a progressbar)")
     print("0: Quit\n")
 
+    option = 0
     cont = False
     while not cont:
         try:
@@ -39,7 +41,7 @@ def start():
             cont = False
             print("Enter a number 0-3")
 
-    if option == 0: # Quit
+    if option == 0:  # Quit
         print("Quitting")
         exit()
     if option == 1:

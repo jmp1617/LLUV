@@ -4,9 +4,8 @@ TUI for lluv
 author: Jacob Potter CSH:(jpotter)
 """
 import npyscreen
-import lluv
+import lluv.lluv as lluv
 import multiprocessing
-import curses
 import sys
 
 # WIDGET SUBCLASSES

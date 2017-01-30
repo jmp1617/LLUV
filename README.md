@@ -22,16 +22,15 @@ Note: lluv_simple_cli has no dependencies besides dd itself
 Note:_lluv needs root for storage device access_ <br />
 
 To start the lluv console run:<br />
-**sudo python3.5 lluvconsole.py**  This will allow an option of interfaces along with automatic<br />
+**sudo lluv.lluvconsole**  This will allow an option of interfaces along with automatic<br />
 terminal resizing. <br />
 
-To run either individually: <br />
-**sudo python3.5 lluv_cli.py**  <br />
+**sudo lluv.cli**  <br />
 
-**sudo python3.5 lluv_tui.py** Note: Terminal will not be auto resized without using lluvconsole so<br />
+**sudo lluv.tui** Note: Terminal will not be auto resized without using lluvconsole so<br />
 the application may crash if the terminal is to small.<br />
 
-**sudo python3.5 lluv_simple_cli.py** A simple lluv cli. Basically a simplified dd with a progress bar <br />
+**sudo lluv.simple_cli.py** A simple lluv cli. Basically a simplified dd with a progress bar <br />
 
 # The TUI
 Written using the [npyscreen](https://github.com/pfalcon-mirrors/npyscreen "npyscreen") library.

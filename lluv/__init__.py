@@ -1,17 +1,20 @@
-import lluv_tui
-import lluv_cli
-import lluv_simple_cli
-import lluvconsole
+import lluv.lluv_tui as lt
+import lluv.lluv_cli as lc
+import lluv.lluv_simple_cli as lsc
+import lluv.lluvconsole as lconsole
 
 
 def tui():
-    lluv_tui.start()
+    lt.start()
+
 
 def cli():
-    lluv_cli.start()
+    lc.start()
+
 
 def simple_cli():
-    lluv_simple_cli.start()
+    lsc.start()
+
 
 def console():
-    lluvconsole.start()
+    lconsole.start()

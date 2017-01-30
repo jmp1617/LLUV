@@ -3,7 +3,7 @@ simple CLI for LLUV
 
 author: Jacob Potter CSH:(jpotter)
 """
-from lluv import *
+import lluv.lluv as lluv
 
 
 def display_curr_choices(selected_usb: str, selected_iso: str, p_usb_devices: dict, images: dict):
@@ -36,17 +36,17 @@ def start():
     selected_usb = ""
     selected_iso = ""
     selected_block_size = "512K"
-    check_config()
+    lluv.check_config()
 
     print("Type start to begin (anything else to exit)\n")
     begin = input("lluv -> ")
     if begin == 'start':
 
         print("\nStarting... ")
-        iso_dir_path = get_path()
-        p_usb_devices = fetch_usb()
-        categories = fetch_images(iso_dir_path)
-        images = generate_image_master(categories)
+        iso_dir_path = lluv.get_path()
+        p_usb_devices = lluv.fetch_usb()
+        categories = lluv.fetch_images(iso_dir_path)
+        images = lluv.generate_image_master(categories)
         print("Done")
 
         done_step_one = False
@@ -79,7 +79,7 @@ def start():
                         done_step_one = False
                     elif choice == key_num + 1:
                         print("\nRefreshing Devices...")
-                        p_usb_devices = fetch_usb()
+                        p_usb_devices = lluv.fetch_usb()
                         print("Done")
                         done_step_one = False
                     elif choice == 0:
@@ -120,15 +120,15 @@ def start():
                         done_step_two = False
                     elif choice == key_num:
                         print("\nRefreshing Images...")
-                        images = fetch_images(iso_dir_path)
+                        images = lluv.fetch_images(iso_dir_path)
                         print("Done")
                         done_step_two = False
                     elif choice == key_num + 1:
                         done_step_one = False
                         done_step_two = False
-                        p_usb_devices = fetch_usb()
-                        categories = fetch_images(iso_dir_path)
-                        images = generate_image_master(categories)
+                        p_usb_devices = lluv.fetch_usb()
+                        categories = lluv.fetch_images(iso_dir_path)
+                        images = lluv.generate_image_master(categories)
                     elif choice == 0:
                         exit()
                     else:
@@ -139,7 +139,7 @@ def start():
                     done_step_two = False
             if selected_iso is not "" and done_step_one and done_step_two:
                 print("\nRunning Compatibility Check...")
-                if check_compatibility(p_usb_devices[selected_usb].get_size(), images[selected_iso].get_rsize()):
+                if lluv.check_compatibility(p_usb_devices[selected_usb].get_size(), images[selected_iso].get_rsize()):
                     print("Selected Device Compatible with Selected Image")
                 else:
                     print("WARNING: devices may not be compatible")
@@ -148,7 +148,7 @@ def start():
 
                 print("\nCalculating Block Size for " + p_usb_devices[selected_usb].get_name() + "...")
 
-                selected_block_size = calculate_block_size(p_usb_devices[selected_usb].get_path())
+                selected_block_size = lluv.calculate_block_size(p_usb_devices[selected_usb].get_path())
 
                 if selected_block_size == '':
                     print("Could not calculate optimal block size\n"
@@ -181,16 +181,16 @@ def start():
                     elif choice == 2:
                         done_step_one = False
                         done_step_three = False
-                        p_usb_devices = fetch_usb()
-                        categories = fetch_images(iso_dir_path)
-                        images = generate_image_master(categories)
+                        p_usb_devices = lluv.fetch_usb()
+                        categories = lluv.fetch_images(iso_dir_path)
+                        images = lluv.generate_image_master(categories)
                         break
                     elif choice == 3:
                         done_step_two = False
                         done_step_three = False
-                        p_usb_devices = fetch_usb()
-                        categories = fetch_images(iso_dir_path)
-                        images = generate_image_master(categories)
+                        p_usb_devices = lluv.fetch_usb()
+                        categories = lluv.fetch_images(iso_dir_path)
+                        images = lluv.generate_image_master(categories)
                         break
                     elif choice == 0:
                         exit()
@@ -203,7 +203,7 @@ def start():
                         final = input("(Y/N) -> ")
                         if final in ("Y", "y"):
                             print("Beginning Write...\n")
-                            write_to_device(images[selected_iso].get_cat() + "/" + images[selected_iso].get_name(),
+                            lluv.write_to_device(images[selected_iso].get_cat() + "/" + images[selected_iso].get_name(),
                                             # Account for iso category
                                             p_usb_devices[selected_usb].get_path(),
                                             selected_block_size,
@@ -220,9 +220,9 @@ def start():
 
     elif begin == 'debug':
         print("[DEBUG]")
-        iso_dir_path = get_path()
-        p_usb_devices = fetch_usb()
-        images = fetch_images(iso_dir_path)
+        iso_dir_path = lluv.get_path()
+        p_usb_devices = lluv.fetch_usb()
+        images = lluv.fetch_images(iso_dir_path)
         print("Path to images:", iso_dir_path)
         print("Possible USB storage devices:", p_usb_devices)
         print("Possible Images to write:", images)

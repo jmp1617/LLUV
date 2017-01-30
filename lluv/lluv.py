@@ -11,7 +11,7 @@ import sys
 import threading
 import os
 from time import sleep
-from lluv_classes import *
+import lluv.lluv_classes as lc
 
 
 def check_config() -> bool:
@@ -26,7 +26,7 @@ def check_config() -> bool:
             return True
 
     # File does not exist
-    subprocess.run(shlex.split("cp .lluvrc " + path_to_rc))
+    subprocess.run(shlex.split("cp lluv/.lluvrc " + path_to_rc))
     return True
 
 
@@ -97,13 +97,13 @@ def fetch_usb() -> dict:
         if len(split) == 7:  # If the device name is two words
             name = split[3] + " " + split[4]
             if name not in ignore:
-                usb_dict[usb_num] = UsbStorageDevice(name, get_usb_size(split[6]), split[6], usb_num)
+                usb_dict[usb_num] = lc.UsbStorageDevice(name, get_usb_size(split[6]), split[6], usb_num)
                 usb_num += 1
 
         elif len(split) == 6:  # If the device name is one word
             name = split[3]
             if name not in ignore:
-                usb_dict[usb_num] = UsbStorageDevice(name, get_usb_size(split[5]), split[5], usb_num)
+                usb_dict[usb_num] = lc.UsbStorageDevice(name, get_usb_size(split[5]), split[5], usb_num)
                 usb_num += 1
 
     return usb_dict
@@ -172,7 +172,7 @@ def fetch_images(iso_dir: str) -> list:
             has_no_cat = True   # mark that there will be a no-category category
             image = str(subprocess.run(["ls", "-l", "--block-siz=MB", iso_dir + "/" + file],
                                        stdout=subprocess.PIPE)).split("stdout=b'")[1].split()
-            no_cat[image_num] = Image(image[8][:len(image[8]) - 4].split("/")[5], image[4], get_rec_size(image[4]), '')
+            no_cat[image_num] = lc.Image(image[8][:len(image[8]) - 4].split("/")[5], image[4], get_rec_size(image[4]), '')
             if index_count not in files_for_deletion:   # if not already to be deleted ( should be not in there)
                 files_for_deletion.append(index_count)
             index_count += 1
@@ -184,7 +184,7 @@ def fetch_images(iso_dir: str) -> list:
         del dirs[index]
 
     if has_no_cat:
-        categories.append(Category("No-Category", no_cat))  # create the no-cat category
+        categories.append(lc.Category("No-Category", no_cat))  # create the no-cat category
 
     # go through the remaining dirs and create relevant category objects
     for category in dirs:
@@ -203,14 +203,14 @@ def fetch_images(iso_dir: str) -> list:
             for image in images:
                 image = image.split()
                 if image[8][len(image[8]) - 4:] == ".iso":
-                    images_dict[image_num] = Image(image[8], image[4], get_rec_size(image[4]), category)
+                    images_dict[image_num] = lc.Image(image[8], image[4], get_rec_size(image[4]), category)
                     image_num += 1
 
         if len(images_dict) is not 0:  # if there were some images in the dir
-            categories.append(Category(category, images_dict))
+            categories.append(lc.Category(category, images_dict))
 
         if len(categories) is 0:    # if there were no categories found
-            categories.append(Category("- No Categories -", {}))
+            categories.append(lc.Category("- No Categories -", {}))
 
     categories.sort(key=lambda x: x.get_name())   # sort the categories alphabetically
     return categories
