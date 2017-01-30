@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+* Fixed simple cli and set for module use
+* changed default path of config to /etc/.lluv
+* Packge
+* update readme
 * update readme
 * Updated readme
 * Added proper exiting functionality
