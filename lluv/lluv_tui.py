@@ -177,6 +177,7 @@ class TitleForm(npyscreen.Form):
     def afterEditing(self):
         self.parentApp.setNextForm('Selection')
 
+
 # MAIN FORM
 
 
@@ -359,10 +360,12 @@ class SelectForm(npyscreen.ActionForm):
     # IF CANCEL IS CLICKED
     def on_cancel(self):
         if not self.parentApp.IS_WRITING:  # Disable cancel button
-            # self.full_reset()   # reset the form # only if kiosk mode
-            sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=24, cols=80))
-            print("Exiting TUI")
-            exit()  # if not kiosk mode, exit the app after resizing
+            if self.parentApp.is_kiosk:
+                self.full_reset()   # reset the form # only if kiosk mode
+            else:
+                sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=24, cols=80))
+                print("Exiting TUI")
+                exit()  # if not kiosk mode, exit the app after resizing
 
     # CALLED EVERY TIME THE USER PRESSES A BUTTON
     # will only update values to avoid slow down
@@ -550,13 +553,20 @@ class LluvTui(npyscreen.StandardApp):
         # FLAGS
         self.haspoped = False
         self.IS_WRITING = False
+        self.is_kiosk = lluv.isKiosk() # Check to see if the kiosk option was selected in the config
 
     def onStart(self):
         # Form initialization
         npyscreen.setTheme(NewTheme)  # set the theme
-        self.addForm('MAIN', TitleForm, name="The CSH L.L.U.V. Machine - Page (1/2)", )  # Title form
-        self.addForm('Selection', SelectForm,                                            # Main selection form
-                     name="Configure and Write - Page (2/2)") # 47 x 143
+        if(self.is_kiosk):
+            self.addForm('MAIN', TitleForm, name="The L.L.U.V. Machine - Page (1/2)", )  # Title form
+            name_for_second = "Configure and Write - Page (2/2)"
+            title = "Selection"
+        else:
+            name_for_second = "Configure and Write"
+            title = "MAIN"
+
+        self.addForm(title, SelectForm, name=name_for_second, ) # 47 x 143   Main selection form
 
     # while the form is waiting, if DD is working, send the event to update the progress
     def while_waiting(self):

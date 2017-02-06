@@ -4,7 +4,7 @@ path = /
 
 #Put devices you wish to ignore from storage device scan here
 #OS disks will automatically be ignored
-# EX: "TOSHIBA MQ01ABD1 = true"
+# EX: "TOSHIBA MQ01ABD1 = True"
 [dev_to_ignore]
 
 
@@ -15,3 +15,4 @@ path = /
 leeway = 200
 mount: /mnt/test_blk
 dd_prog_location: /tmp/lluv_dd.log
+kiosk = False

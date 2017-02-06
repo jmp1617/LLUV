@@ -52,6 +52,18 @@ def set_image_path(path: str):
         config.write(conf)
 
 
+def isKiosk() -> bool:
+    """
+    Return true if the kisok option is selected
+    in the config
+    """
+    config = configparser.ConfigParser()
+    config.read(get_config())
+    iskiosk =  bool(config['configuration']['kiosk'])
+    print(iskiosk)
+     
+
+
 def get_path() -> str:
     """
     Function to parse the config file for the path to the ISO dir
