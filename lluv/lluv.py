@@ -27,7 +27,8 @@ def check_config() -> bool:
 
     # File does not exist
     print("Creating Config")
-    subprocess.run(shlex.split("cp lluv/lluvrc " + path_to_rc))
+    configpath = os.path.join(os.path.dirname(__file__), "lluvrc")
+    subprocess.run(shlex.split("cp " + configpath + " " + path_to_rc))
     return True
 
 

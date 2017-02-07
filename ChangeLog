@@ -1,6 +1,7 @@
 CHANGES
 =======
 
+* added config gen to start of program
 * changed config name
 * Added kiosk mode
 * removed .idea
