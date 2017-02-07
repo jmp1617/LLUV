@@ -22,11 +22,11 @@ def check_config() -> bool:
     """
     path_to_rc = "/etc/"
     for file in os.listdir(path_to_rc):
-        if file == ".lluvrc":
+        if file == "lluvrc":
             return True
 
     # File does not exist
-    subprocess.run(shlex.split("cp lluv/.lluvrc " + path_to_rc))
+    subprocess.run(shlex.split("cp lluv/lluvrc " + path_to_rc))
     return True
 
 
@@ -36,7 +36,7 @@ def get_config() -> str:
     :return: path of config
     """
     if check_config():
-        return "/etc/.lluvrc"
+        return "/etc/lluvrc"
 
 
 def set_image_path(path: str):
@@ -59,9 +59,8 @@ def isKiosk() -> bool:
     """
     config = configparser.ConfigParser()
     config.read(get_config())
-    iskiosk =  bool(config['configuration']['kiosk'])
-    print(iskiosk)
-     
+    iskiosk = bool(config['configuration']['kiosk'])
+
 
 
 def get_path() -> str:

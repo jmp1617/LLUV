@@ -8,6 +8,7 @@ author: Jacob Potter CSH:(jpotter)
 import lluv.lluv_tui as lluv_tui
 import lluv.lluv_cli as lluv_cli
 import lluv.lluv_simple_cli as lluv_simple_cli
+import lluv.lluv as lluv
 import sys
 
 
@@ -19,6 +20,9 @@ def start():
     """
     prompt the user for a lluv interface
     """
+
+    # config init
+    lluv.check_config()
 
     print("\nWELCOME TO THE L.L.U.V. (Linux Live USB Vending) MACHINE CLI")
     print("by Jacob Potter (jpotter)\n")
