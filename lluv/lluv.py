@@ -16,7 +16,7 @@ import lluv.lluv_classes as lc
 
 def check_config() -> bool:
     """
-    function to check for .lluvrc in the users home dir
+    function to check for lluvrc in the users home dir
     if its not there, create one
     :return:
     """
@@ -26,6 +26,7 @@ def check_config() -> bool:
             return True
 
     # File does not exist
+    print("Creating Config")
     subprocess.run(shlex.split("cp lluv/lluvrc " + path_to_rc))
     return True
 
@@ -164,7 +165,7 @@ def fetch_images(iso_dir: str) -> list:
 
     if len(dirs) == 1 and dirs[0] == '':  # if there wasn't a path supplied or the path couldn't be found
         print("There doesnt seem to be a path or a correct path in the config for an iso dir. \n"
-              "Or the dir is empty. The .lluvrc is located at: "+get_config())
+              "Or the dir is empty. The lluvrc is located at: "+get_config())
         exit()
 
     if len(dirs) != 0:

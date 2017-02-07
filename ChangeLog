@@ -1,6 +1,7 @@
 CHANGES
 =======
 
+* changed config name
 * Added kiosk mode
 * removed .idea
 * Fixed simple cli and set for module use

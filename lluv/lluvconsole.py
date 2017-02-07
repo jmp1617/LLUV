@@ -22,7 +22,9 @@ def start():
     """
 
     # config init
-    lluv.check_config()
+    if not lluv.check_config():
+        print("Config Gen Error")
+        exit()
 
     print("\nWELCOME TO THE L.L.U.V. (Linux Live USB Vending) MACHINE CLI")
     print("by Jacob Potter (jpotter)\n")
