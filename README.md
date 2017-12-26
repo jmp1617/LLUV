@@ -5,6 +5,9 @@ an easy to use user interface. The backend uses DD so use with care. If the usb 
 is allocated and writable, a block size will automatically be generated for  <br />
 optimal performance.
 
+Demo Picture <br />
+![Demo](lluv_demo.png)<br />
+
 **LLUV** was originally designed to run in a kiosk fashion, and read from large lists of images, both <br />
 local and remote.<br />
 
